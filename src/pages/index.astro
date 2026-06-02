@@ -1,13 +1,36 @@
 ---
 // Homepage
+import '../styles/global.css';
 ---
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Astro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mood Fix App</title>
   </head>
-  <body>
-    <h1>Hello, app is working and auto-deploying!</h1>
+  <body class="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <!-- Vercel-inspired mesh background -->
+    <div class="absolute inset-0 z-0 opacity-30 pointer-events-none" style="background: radial-gradient(circle at 15% 50%, var(--color-gradient-preview-start), transparent 25%), radial-gradient(circle at 85% 30%, var(--color-gradient-dev-end), transparent 25%);"></div>
+    
+    <div class="z-10 bg-canvas/80 backdrop-blur-xl border border-hairline p-10 rounded-lg shadow-float max-w-2xl w-full text-center animate-slide-up">
+      <div class="inline-block bg-primary text-on-primary font-mono text-xs px-3 py-1 rounded-pill mb-6 uppercase tracking-widest animate-fade-in" style="animation-delay: 0.2s;">
+        Systems Online
+      </div>
+      <h1 class="text-4xl md:text-5xl font-semibold tracking-tight text-ink mb-4 animate-fade-in" style="animation-delay: 0.3s;">
+        The Future is Fluid.
+      </h1>
+      <p class="text-lg text-body mb-8 max-w-lg mx-auto animate-fade-in" style="animation-delay: 0.4s;">
+        Welcome to the next generation frontend architecture. Tailwind v4, Vercel design tokens, and Huashu structural flow are now active.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style="animation-delay: 0.5s;">
+        <button class="bg-primary hover:bg-ink/90 text-on-primary font-medium text-base px-6 py-3 rounded-pill transition-all active:scale-95 shadow-soft">
+          Start Deploying
+        </button>
+        <button class="bg-canvas hover:bg-canvas-soft border border-hairline text-ink font-medium text-base px-6 py-3 rounded-pill transition-all active:scale-95">
+          View Documentation
+        </button>
+      </div>
+    </div>
   </body>
 </html>
