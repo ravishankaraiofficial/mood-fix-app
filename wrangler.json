@@ -1,6 +1,7 @@
 {
   "name": "mood-fix-app",
   "compatibility_date": "2024-05-01",
+  "compatibility_flags": ["nodejs_compat"],
   "main": "dist/_worker.js/index.js",
   "assets": {
     "directory": "dist"
