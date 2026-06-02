@@ -45,11 +45,19 @@ export const POST: APIRoute = async (context) => {
 
     // 4. Convert to Base64
     const arrayBuffer = await audioFile.arrayBuffer();
-    // Use standard buffer handling that works in Cloudflare Workers and Node
     const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
     const mimeType = audioFile.type || 'audio/webm';
+    
+    // 5. Language Selection
+    const languageMap: Record<string, string> = {
+      en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", mr: "Marathi", ta: "Tamil", gu: "Gujarati", ur: "Urdu", kn: "Kannada", or: "Odia", ml: "Malayalam", pa: "Punjabi", as: "Assamese"
+    };
+    const langCode = formData.get('language') as string || 'en';
+    const languageName = languageMap[langCode] || "English";
+    
+    const dynamicSystemPrompt = `${SYSTEM_PROMPT}\n\nRespond ENTIRELY in the following language: ${languageName}. The emotion word, the breathing exercise or calming passage, and the distress message must ALL be in that language. Use natural, native phrasing.`;
 
-    // 5. Call Gemini 2.5 Flash
+    // 6. Call Gemini 2.5 Flash
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 seconds
 
@@ -60,7 +68,7 @@ export const POST: APIRoute = async (context) => {
         signal: controller.signal,
         body: JSON.stringify({
           systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
+            parts: [{ text: dynamicSystemPrompt }]
           },
           contents: [{
             parts: [

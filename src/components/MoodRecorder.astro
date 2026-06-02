@@ -2,19 +2,37 @@
 // src/components/MoodRecorder.astro
 ---
 
-<mood-recorder class="w-full flex flex-col items-center">
+<mood-recorder class="w-full flex flex-col items-center pt-2">
+  <!-- Language Bar -->
+  <nav id="lang-bar" class="w-full flex flex-wrap justify-center gap-x-3 gap-y-2 mb-10 text-sm text-orange-900/60 transition-all" aria-label="Language selection">
+    <!-- Buttons dynamically inserted by JS, but hardcoded here for layout stability -->
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to English" data-lang="en">English</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Hindi" data-lang="hi">हिन्दी</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Bengali" data-lang="bn">বাংলা</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Telugu" data-lang="te">తెలుగు</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Marathi" data-lang="mr">मराठी</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Tamil" data-lang="ta">தமிழ்</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Gujarati" data-lang="gu">ગુજરાતી</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Urdu" data-lang="ur">اردو</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Kannada" data-lang="kn">ಕನ್ನಡ</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Odia" data-lang="or">ଓଡ଼ିଆ</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Malayalam" data-lang="ml">മലയാളം</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Punjabi" data-lang="pa">ਪੰਜਾਬੀ</button>
+    <button type="button" class="lang-btn hover:font-bold hover:text-orange-900 focus-visible:font-bold focus-visible:text-orange-900 transition-all" aria-label="Switch to Assamese" data-lang="as">অসমীয়া</button>
+  </nav>
+
   <!-- Record View -->
   <div id="record-view" class="w-full flex flex-col items-center">
-    <h1 class="text-3xl font-semibold tracking-tight mb-2 text-orange-900">
+    <h1 id="ui-heading" class="text-3xl font-semibold tracking-tight mb-2 text-orange-900 transition-all duration-300">
       Tell me how you’re feeling
     </h1>
-    <p class="text-base text-orange-800/80 mb-12">
+    <p id="ui-subheading" class="text-base text-orange-800/80 mb-12 transition-all duration-300">
       Speak for up to 30 seconds. I’ll listen and respond.
     </p>
 
     <!-- Status Region -->
     <div class="h-12 mb-8 flex items-center justify-center text-center">
-      <p id="status-text" class="text-lg font-medium text-orange-900" aria-live="polite">
+      <p id="status-text" class="text-lg font-medium text-orange-900 transition-all duration-300" aria-live="polite">
         Tap the microphone to start.
       </p>
     </div>
@@ -37,16 +55,16 @@
       <div id="pulse-ring" class="absolute inset-0 rounded-full border-2 border-orange-500 opacity-0 pointer-events-none"></div>
     </button>
     
-    <p id="error-message" class="mt-6 text-sm text-red-600 text-center hidden font-medium px-4 py-2 bg-red-50 rounded-md" aria-live="assertive"></p>
+    <p id="error-message" class="mt-6 text-sm text-red-600 text-center hidden font-medium px-4 py-2 bg-red-50 rounded-md transition-all duration-300" aria-live="assertive"></p>
   </div>
 
   <!-- Response View -->
   <div id="response-view" class="w-full hidden flex-col items-center animate-fade-in">
-    <h1 id="response-heading" class="text-3xl font-semibold tracking-tight mb-8 text-orange-900" aria-live="polite">
+    <h1 id="response-heading" class="text-3xl font-semibold tracking-tight mb-8 text-orange-900 transition-all duration-300" aria-live="polite">
       I hear you’re feeling: …
     </h1>
 
-    <div id="response-content-area" class="w-full mb-8 text-left" aria-live="polite">
+    <div id="response-content-area" class="w-full mb-8 text-left transition-all duration-300" aria-live="polite">
       <!-- Breathing or Text injected here -->
     </div>
 
@@ -54,13 +72,21 @@
       <div class="w-24 h-24 rounded-full bg-orange-400/30 breathing-circle"></div>
     </div>
 
-    <div id="distress-box" class="hidden w-full mb-8 p-4 bg-orange-100 border border-orange-200 rounded-lg text-orange-900 text-left text-sm">
+    <div id="distress-box" class="hidden w-full mb-8 p-4 bg-orange-100 border border-orange-200 rounded-lg text-orange-900 text-left text-sm transition-all duration-300">
       <!-- Distress message injected here -->
     </div>
 
     <button id="start-over-btn" class="px-6 py-3 bg-white border border-orange-200 rounded-full text-orange-900 font-medium shadow-sm hover:bg-orange-50 active:scale-95 transition-transform" style="touch-action: manipulation; outline-offset: 4px;">
       Start over
     </button>
+  </div>
+  
+  <!-- Language Confirmation Toast -->
+  <div id="lang-toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-orange-900/95 backdrop-blur-sm text-orange-50 px-6 py-3 rounded-full text-sm font-medium shadow-xl pointer-events-none transition-all duration-300 opacity-0 translate-y-4 z-50 flex items-center gap-2" aria-live="polite" role="status">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-orange-300" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+    </svg>
+    <span id="lang-toast-text"></span>
   </div>
 </mood-recorder>
 
@@ -71,8 +97,28 @@
   }
   
   button:focus-visible {
-    outline: 3px solid #ea580c; /* Tailwind orange-600 */
+    outline: 3px solid #ea580c;
     outline-offset: 4px;
+  }
+  
+  /* Language bar styling */
+  .lang-btn {
+    transition-property: font-weight, opacity;
+    transition-duration: 200ms;
+  }
+  .lang-btn.active {
+    font-weight: 700;
+    color: #7c2d12;
+    text-decoration: underline;
+    text-decoration-color: #ea580c;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+  }
+  
+  /* Toast Animation */
+  #lang-toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
   
   /* Tabular nums for timer */
@@ -80,7 +126,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Pulse animation using only transform and opacity */
+  /* Pulse animation */
   @keyframes pulse-ring {
     0% { transform: scale(1); opacity: 0.8; }
     100% { transform: scale(1.6); opacity: 0; }
@@ -104,13 +150,7 @@
     transform: scale(0.95);
   }
 
-  /* Breathing Circle Animation (scale 1.0 to 1.4 over 4s, hold 1s, back 4s, pause 1s) = 10s total */
-  /*
-     0% -> 4s (40%) = scale up
-     40% -> 50% (hold) = stay scaled
-     50% -> 90% = scale down
-     90% -> 100% = pause
-  */
+  /* Breathing Circle Animation */
   @keyframes breathe {
     0% { transform: scale(1); }
     40% { transform: scale(1.4); }
@@ -147,14 +187,225 @@
     .reduced-motion-steps {
       display: block !important;
     }
+    #lang-toast {
+      transition: opacity 300ms !important;
+      transform: translate(-50%, 0) !important;
+    }
+    #lang-toast.show {
+      opacity: 1 !important;
+    }
   }
 </style>
 
 <script>
   // @ts-nocheck
+  
+  // Translation Dictionary
+  const i18n = {
+    en: {
+      langName: "English",
+      heading: "Tell me how you’re feeling",
+      subheading: "Speak for up to 30 seconds. I’ll listen and respond.",
+      status_start: "Tap the microphone to start.",
+      status_recording: "Recording… {time}",
+      status_processing: "Processing…",
+      status_error: "Something went wrong. Please try again.",
+      response_prefix: "I hear you’re feeling:",
+      start_over: "Start over",
+      try_again: "Try again",
+      disclaimer: "This is a calming tool, not medical advice. If you are in crisis, please reach out to someone you trust or a local helpline.",
+      toast_message: "Your responses will now be in English.",
+      font: ""
+    },
+    hi: {
+      langName: "हिन्दी",
+      heading: "मुझे बताएं कि आप कैसा महसूस कर रहे हैं",
+      subheading: "30 सेकंड तक बोलें। मैं सुनूंगा और जवाब दूंगा।",
+      status_start: "शुरू करने के लिए माइक्रोफ़ोन पर टैप करें।",
+      status_recording: "रिकॉर्ड हो रहा है… {time}",
+      status_processing: "प्रक्रिया हो रही है…",
+      status_error: "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+      response_prefix: "मुझे लग रहा है कि आप महसूस कर रहे हैं:",
+      start_over: "फिर से शुरू करें",
+      try_again: "पुनः प्रयास करें",
+      disclaimer: "यह एक शांत करने वाला टूल है, चिकित्सा सलाह नहीं। यदि आप संकट में हैं, तो कृपया किसी ऐसे व्यक्ति से संपर्क करें जिस पर आप भरोसा करते हैं या स्थानीय हेल्पलाइन से संपर्क करें।",
+      toast_message: "आपकी प्रतिक्रियाएँ अब हिन्दी में होंगी।",
+      font: "'Noto Sans Devanagari', sans-serif"
+    },
+    bn: {
+      langName: "বাংলা",
+      heading: "বলুন আপনি কেমন অনুভব করছেন",
+      subheading: "সর্বোচ্চ ৩০ সেকেন্ড কথা বলুন। আমি শুনব এবং উত্তর দেব।",
+      status_start: "শুরু করতে মাইক্রোফোনে ট্যাপ করুন।",
+      status_recording: "রেকর্ড হচ্ছে… {time}",
+      status_processing: "প্রক্রিয়া চলছে…",
+      status_error: "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+      response_prefix: "আমার মনে হচ্ছে আপনার অনুভূতি:",
+      start_over: "আবার শুরু করুন",
+      try_again: "আবার চেষ্টা করুন",
+      disclaimer: "এটি একটি মন শান্ত করার টুল, কোনো চিকিৎসা পরামর্শ নয়। আপনি যদি সংকটে থাকেন, তবে অনুগ্রহ করে আপনার বিশ্বস্ত কারও বা কোনো স্থানীয় হেল্পলাইনের সাথে যোগাযোগ করুন।",
+      toast_message: "আপনার প্রতিক্রিয়া এখন বাংলায় হবে।",
+      font: "'Noto Sans Bengali', sans-serif"
+    },
+    te: {
+      langName: "తెలుగు",
+      heading: "మీరు ఎలా భావిస్తున్నారో చెప్పండి",
+      subheading: "30 సెకన్ల వరకు మాట్లాడండి. నేను విని స్పందిస్తాను.",
+      status_start: "ప్రారంభించడానికి మైక్రోఫోన్ నొక్కండి.",
+      status_recording: "రికార్డ్ అవుతోంది… {time}",
+      status_processing: "ప్రాసెస్ అవుతోంది…",
+      status_error: "ఏదో పొరపాటు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
+      response_prefix: "మీరు ఇలా భావిస్తున్నారని నాకు అనిపిస్తోంది:",
+      start_over: "మళ్ళీ ప్రారంభించండి",
+      try_again: "మళ్లీ ప్రయత్నించండి",
+      disclaimer: "ఇది మనస్సును ప్రశాంతపరిచే సాధనం, వైద్య సలహా కాదు. మీరు క్లిష్ట పరిస్థితుల్లో ఉంటే, దయచేసి మీకు నమ్మకమైన వ్యక్తులను లేదా స్థానిక హెల్ప్‌లైన్‌ను సంప్రదించండి.",
+      toast_message: "మీ స్పందనలు ఇప్పుడు తెలుగులో ఉంటాయి.",
+      font: "'Noto Sans Telugu', sans-serif"
+    },
+    mr: {
+      langName: "मराठी",
+      heading: "तुम्हाला कसं वाटतंय ते मला सांगा",
+      subheading: "३० सेकंदांपर्यंत बोला. मी ऐकून प्रतिसाद देईन.",
+      status_start: "सुरू करण्यासाठी मायक्रोफोनवर टॅप करा.",
+      status_recording: "रेकॉर्डिंग सुरू आहे… {time}",
+      status_processing: "प्रक्रिया सुरू आहे…",
+      status_error: "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.",
+      response_prefix: "मला जाणवतंय की तुम्ही अनुभवत आहात:",
+      start_over: "पुन्हा सुरू करा",
+      try_again: "पुन्हा प्रयत्न करा",
+      disclaimer: "हे मन शांत करण्यासाठीचे टूल आहे, वैद्यकीय सल्ला नाही. जर तुम्ही संकटात असाल, तर कृपया तुमच्या ओळखीच्या किंवा विश्वासू व्यक्तीशी, किंवा स्थानिक हेल्पलाइनशी संपर्क साधा.",
+      toast_message: "तुमचे प्रतिसाद आता मराठीत असतील.",
+      font: "'Noto Sans Devanagari', sans-serif"
+    },
+    ta: {
+      langName: "தமிழ்",
+      heading: "நீங்கள் எப்படி உணர்கிறீர்கள் என்று சொல்லுங்கள்",
+      subheading: "30 வினாடிகள் வரை பேசுங்கள். நான் கேட்டு பதிலளிப்பேன்.",
+      status_start: "தொடங்க மைக்ரோஃபோனைத் தட்டவும்.",
+      status_recording: "பதிவாகிறது… {time}",
+      status_processing: "செயலாக்கப்படுகிறது…",
+      status_error: "ஏதோ தவறு நடந்துவிட்டது. மீண்டும் முயற்சிக்கவும்.",
+      response_prefix: "நீங்கள் இவ்வாறு உணர்கிறீர்கள் என எனக்குத் தோன்றுகிறது:",
+      start_over: "மீண்டும் தொடங்கவும்",
+      try_again: "மீண்டும் முயற்சிக்கவும்",
+      disclaimer: "இது மனதை அமைதிப்படுத்தும் ஒரு கருவியாகும், மருத்துவ ஆலோசனை அல்ல. நீங்கள் மன நெருக்கடியில் இருந்தால், தயவுசெய்து நீங்கள் நம்பும் ஒருவரையோ அல்லது உள்ளூர் உதவி மையத்தையோ தொடர்பு கொள்ளவும்.",
+      toast_message: "உங்கள் பதில்கள் இனி தமிழில் இருக்கும்.",
+      font: "'Noto Sans Tamil', sans-serif"
+    },
+    gu: {
+      langName: "ગુજરાતી",
+      heading: "તમને કેવું લાગે છે તે મને કહો",
+      subheading: "૩૦ સેકન્ડ સુધી બોલો. હું સાંભળીને પ્રતિસાદ આપીશ.",
+      status_start: "શરૂ કરવા માટે માઇક્રોફોન પર ટૅપ કરો.",
+      status_recording: "રેકોર્ડિંગ થઈ રહ્યું છે… {time}",
+      status_processing: "પ્રક્રિયા થઈ રહી છે…",
+      status_error: "કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.",
+      response_prefix: "મને લાગે છે કે તમે અનુભવી રહ્યા છો:",
+      start_over: "ફરીથી શરૂ કરો",
+      try_again: "ફરી પ્રયાસ કરો",
+      disclaimer: "આ મનને શાંત કરવા માટેનું ટૂલ છે, તબીબી સલાહ નહીં. જો તમે સંકટમાં હોવ, તો કૃપા કરીને તમારા વિશ્વાસુ વ્યક્તિનો અથવા સ્થાનિક હેલ્પલાઇનનો સંપર્ક કરો.",
+      toast_message: "તમારા પ્રતિસાદ હવે ગુજરાતીમાં હશે.",
+      font: "'Noto Sans Gujarati', sans-serif"
+    },
+    ur: {
+      langName: "اردو",
+      heading: "مجھے بتائیں آپ کیسا محسوس کر رہے ہیں",
+      subheading: "30 سیکنڈ تک بات کریں۔ میں سن کر جواب دوں گا۔",
+      status_start: "شروع کرنے کے لیے مائیکروفون پر ٹیپ کریں۔",
+      status_recording: "ریکارڈنگ ہو رہی ہے… {time}",
+      status_processing: "پروسیسنگ ہو رہی ہے…",
+      status_error: "کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔",
+      response_prefix: "مجھے لگ رہا ہے کہ آپ محسوس کر رہے ہیں:",
+      start_over: "دوبارہ شروع کریں",
+      try_again: "دوبارہ کوشش کریں",
+      disclaimer: "یہ ذہن کو پرسکون کرنے کا ایک ٹول ہے، کوئی طبی مشورہ نہیں۔ اگر آپ کسی بحران کا شکار ہیں تو براہ کرم کسی ایسے شخص سے رابطہ کریں جس پر آپ بھروسہ کرتے ہوں یا مقامی ہیلپ لائن سے رابطہ کریں۔",
+      toast_message: "آپ کے جوابات اب اردو میں ہوں گے۔",
+      font: "'Noto Nastaliq Urdu', serif"
+    },
+    kn: {
+      langName: "ಕನ್ನಡ",
+      heading: "ನೀವು ಹೇಗೆ ಭಾವಿಸುತ್ತಿದ್ದೀರಿ ಎಂದು ಹೇಳಿ",
+      subheading: "30 ಸೆಕೆಂಡುಗಳವರೆಗೆ ಮಾತನಾಡಿ. ನಾನು ಕೇಳಿ ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತೇನೆ.",
+      status_start: "ಪ್ರಾರಂಭಿಸಲು ಮೈಕ್ರೊಫೋನ್ ಟ್ಯಾಪ್ ಮಾಡಿ.",
+      status_recording: "ರೆಕಾರ್ಡ್ ಆಗುತ್ತಿದೆ… {time}",
+      status_processing: "ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ…",
+      status_error: "ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.",
+      response_prefix: "ನೀವು ಹೀಗೆ ಭಾವಿಸುತ್ತಿದ್ದೀರಿ ಎಂದು ನನಗೆ ಅನ್ನಿಸುತ್ತಿದೆ:",
+      start_over: "ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ",
+      try_again: "ಪುನಃ ಪ್ರಯತ್ನಿಸಿ",
+      disclaimer: "ಇದು ಮನಸ್ಸನ್ನು ಶಾಂತಗೊಳಿಸುವ ಸಾಧನವೇ ಹೊರತು, ವೈದ್ಯಕೀಯ ಸಲಹೆಯಲ್ಲ. ನೀವು ಸಂಕಷ್ಟದಲ್ಲಿದ್ದರೆ, ದಯವಿಟ್ಟು ನಿಮಗೆ ನಂಬಿಕೆಯಿರುವವರನ್ನು ಅಥವಾ ಸ್ಥಳೀಯ ಸಹಾಯವಾಣಿಯನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+      toast_message: "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಗಳು ಈಗ ಕನ್ನಡದಲ್ಲಿ ಇರುತ್ತವೆ.",
+      font: "'Noto Sans Kannada', sans-serif"
+    },
+    or: {
+      langName: "ଓଡ଼ିଆ",
+      heading: "ଆପଣ କିପରି ଅନୁଭବ କରୁଛନ୍ତି ମୋତେ କୁହନ୍ତୁ",
+      subheading: "୩୦ ସେକେଣ୍ଡ ପର୍ଯ୍ୟନ୍ତ କୁହନ୍ତୁ। ମୁଁ ଶୁଣିବି ଏବଂ ଉତ୍ତର ଦେବି।",
+      status_start: "ଆରମ୍ଭ କରିବା ପାଇଁ ମାଇକ୍ରୋଫୋନରେ ଟ୍ୟାପ୍ କରନ୍ତୁ।",
+      status_recording: "ରେକର୍ଡିଂ ହେଉଛି… {time}",
+      status_processing: "ପ୍ରକ୍ରିୟାକରଣ ଚାଲିଛି…",
+      status_error: "କିଛି ତ୍ରୁଟି ଘଟିଛି। ଦୟାକରି ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ।",
+      response_prefix: "ମୁଁ ଅନୁଭବ କରୁଛି ଯେ ଆପଣ ଅନୁଭବ କରୁଛନ୍ତି:",
+      start_over: "ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ",
+      try_again: "ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ",
+      disclaimer: "ଏହା ଏକ ଶାନ୍ତିଦାୟକ ଉପକରଣ, କୌଣସି ଚିକିତ୍ସା ପରାମର୍ଶ ନୁହେଁ। ଯଦି ଆପଣ କୌଣସି ସଙ୍କଟରେ ଅଛନ୍ତି, ଦୟାକରି ଆପଣଙ୍କର ବିଶ୍ୱସ୍ତ ବ୍ୟକ୍ତି କିମ୍ବା ସ୍ଥାନୀୟ ହେଲ୍ପଲାଇନ୍ ସହିତ ଯୋଗାଯୋଗ କରନ୍ତୁ।",
+      toast_message: "ଆପଣଙ୍କର ପ୍ରତିକ୍ରିୟା ବର୍ତ୍ତମାନ ଓଡ଼ିଆରେ ହେବ।",
+      font: "'Noto Sans Oriya', sans-serif"
+    },
+    ml: {
+      langName: "മലയാളം",
+      heading: "നിങ്ങൾക്ക് എന്താണ് തോന്നുന്നതെന്ന് എന്നോട് പറയുക",
+      subheading: "30 സെക്കൻഡ് വരെ സംസാരിക്കുക. ഞാൻ കേട്ട് പ്രതികരിക്കാം.",
+      status_start: "ആരംഭിക്കുന്നതിന് മൈക്രോഫോണിൽ ടാപ്പ് ചെയ്യുക.",
+      status_recording: "റെക്കോർഡ് ചെയ്യുന്നു… {time}",
+      status_processing: "പ്രോസസ്സ് ചെയ്യുന്നു…",
+      status_error: "എന്തോ പിഴവ് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
+      response_prefix: "നിങ്ങൾക്ക് ഇങ്ങനെ തോന്നുന്നുവെന്ന് ഞാൻ മനസ്സിലാക്കുന്നു:",
+      start_over: "വീണ്ടും തുടങ്ങുക",
+      try_again: "വീണ്ടും ശ്രമിക്കുക",
+      disclaimer: "ഇതൊരു സാന്ത്വന ഉപകരണമാണ്, വൈദ്യോപദേശമല്ല. നിങ്ങൾ മാനസിക ബുദ്ധിമുട്ടുകൾ നേരിടുകയാണെങ്കിൽ, നിങ്ങൾക്ക് വിശ്വാസമുള്ള ആരെങ്കിലുമായോ അല്ലെങ്കിൽ ഒരു പ്രാദേശിക ഹെൽപ്പ്‌ലൈനുമായോ ബന്ധപ്പെടുക.",
+      toast_message: "നിങ്ങളുടെ പ്രതികരണങ്ങൾ ഇനി മലയാളത്തിൽ ആയിരിക്കും.",
+      font: "'Noto Sans Malayalam', sans-serif"
+    },
+    pa: {
+      langName: "ਪੰਜਾਬੀ",
+      heading: "ਮੈਨੂੰ ਦੱਸੋ ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ",
+      subheading: "30 ਸਕਿੰਟਾਂ ਤੱਕ ਬੋਲੋ। ਮੈਂ ਸੁਣ ਕੇ ਜਵਾਬ ਦੇਵਾਂਗਾ।",
+      status_start: "ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਮਾਈਕ੍ਰੋਫ਼ੋਨ 'ਤੇ ਟੈਪ ਕਰੋ।",
+      status_recording: "ਰਿਕਾਰਡ ਹੋ ਰਿਹਾ ਹੈ… {time}",
+      status_processing: "ਪ੍ਰਕਿਰਿਆ ਚੱਲ ਰਹੀ ਹੈ…",
+      status_error: "ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+      response_prefix: "ਮੈਨੂੰ ਲੱਗਦਾ ਹੈ ਕਿ ਤੁਸੀਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ:",
+      start_over: "ਦੁਬਾਰਾ ਸ਼ੁਰੂ ਕਰੋ",
+      try_again: "ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+      disclaimer: "ਇਹ ਮਨ ਨੂੰ ਸ਼ਾਂਤ ਕਰਨ ਵਾਲਾ ਟੂਲ ਹੈ, ਕੋਈ ਡਾਕਟਰੀ ਸਲਾਹ ਨਹੀਂ। ਜੇਕਰ ਤੁਸੀਂ ਸੰਕਟ ਵਿੱਚ ਹੋ, ਤਾਂ ਕਿਰਪਾ ਕਰਕੇ ਕਿਸੇ ਅਜਿਹੇ ਵਿਅਕਤੀ ਨਾਲ ਸੰਪਰਕ ਕਰੋ ਜਿਸ 'ਤੇ ਤੁਸੀਂ ਭਰੋਸਾ ਕਰਦੇ ਹੋ ਜਾਂ ਸਥਾਨਕ ਹੈਲਪਲਾਈਨ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।",
+      toast_message: "ਤੁਹਾਡੇ ਜਵਾਬ ਹੁਣ ਪੰਜਾਬੀ ਵਿੱਚ ਹੋਣਗੇ।",
+      font: "'Noto Sans Gurmukhi', sans-serif"
+    },
+    as: {
+      langName: "অসমীয়া",
+      heading: "আপুনি কেনে অনুভৱ কৰিছে মোক কওক",
+      subheading: "৩০ ছেকেণ্ডলৈকে কথা পাতিব পাৰে। মই শুনি উত্তৰ দিম।",
+      status_start: "আৰম্ভ কৰিবলৈ মাইক্ৰ'ফোনত টিপক।",
+      status_recording: "ৰেকৰ্ডিং হৈ আছে… {time}",
+      status_processing: "প্ৰক্ৰিয়াকৰণ হৈ আছে…",
+      status_error: "কিবা এটা ভুল হ'ল। অনুগ্ৰহ কৰি পুনৰ চেষ্টা কৰক।",
+      response_prefix: "মই শুনিছো আপুনি অনুভৱ কৰিছে:",
+      start_over: "আকৌ আৰম্ভ কৰক",
+      try_again: "পুনৰ চেষ্টা কৰক",
+      disclaimer: "এইটো মন শান্ত কৰা এটা সঁজুলি, কোনো চিকিৎসা পৰামৰ্শ নহয়। আপুনি যদি সংকটত আছে, তেন্তে অনুগ্ৰহ কৰি আপোনাৰ বিশ্বাসী কোনো ব্যক্তি বা স্থানীয় হেল্পলাইনৰ সৈতে যোগাযোগ কৰক।",
+      toast_message: "আপোনাৰ প্ৰতিক্ৰিয়া এতিয়া অসমীয়াত হ'ব।",
+      font: "'Noto Sans Bengali', sans-serif"
+    }
+  };
+
   class MoodRecorder extends HTMLElement {
     constructor() {
       super();
+      
+      // UI Elements
+      this.uiHeading = this.querySelector('#ui-heading');
+      this.uiSubheading = this.querySelector('#ui-subheading');
       
       // Views
       this.recordView = this.querySelector('#record-view');
@@ -171,6 +422,11 @@
       this.breathingCircleContainer = this.querySelector('#breathing-circle-container');
       this.distressBox = this.querySelector('#distress-box');
       this.startOverBtn = this.querySelector('#start-over-btn');
+      
+      // Toast
+      this.toastContainer = this.querySelector('#lang-toast');
+      this.toastText = this.querySelector('#lang-toast-text');
+      this.toastTimeout = null;
 
       // State
       this.isRecording = false;
@@ -179,9 +435,103 @@
       this.timerInterval = null;
       this.secondsElapsed = 0;
       this.maxSeconds = 30;
+      this.lastDetectedEmotion = "";
+      this.currentLang = 'en'; // default
+      this.hasErrorState = false;
+      
+      // Setup Language Bar
+      this.setupLanguageBar();
       
       this.btn.addEventListener('click', () => this.toggleRecording());
       this.startOverBtn.addEventListener('click', () => this.resetUI());
+      
+      // Allow tapping toast to dismiss early
+      this.toastContainer.addEventListener('click', () => {
+        this.toastContainer.classList.remove('show');
+      });
+    }
+
+    setupLanguageBar() {
+      const savedLang = localStorage.getItem('moodReliefLang');
+      if (savedLang && i18n[savedLang]) {
+        this.currentLang = savedLang;
+      }
+
+      const langBtns = this.querySelectorAll('.lang-btn');
+      langBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          this.setLanguage(btn.dataset.lang);
+        });
+      });
+
+      // Apply initial language (without toast)
+      this.setLanguage(this.currentLang, true);
+    }
+
+    showToast(msg) {
+      if (this.toastTimeout) clearTimeout(this.toastTimeout);
+      
+      this.toastText.textContent = msg;
+      this.toastContainer.classList.add('show');
+      
+      this.toastTimeout = setTimeout(() => {
+        this.toastContainer.classList.remove('show');
+      }, 3000);
+    }
+
+    setLanguage(langCode, isInitial = false) {
+      this.currentLang = langCode;
+      localStorage.setItem('moodReliefLang', langCode);
+
+      // Update RTL/LTR layout for Urdu
+      document.documentElement.dir = (langCode === 'ur') ? 'rtl' : 'ltr';
+
+      // Update Language Bar UI
+      const langBtns = this.querySelectorAll('.lang-btn');
+      langBtns.forEach(btn => {
+        if (btn.dataset.lang === langCode) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      const t = i18n[langCode];
+      
+      // Show confirmation toast
+      if (!isInitial) {
+        this.showToast(t.toast_message);
+      }
+
+      // Update Fonts
+      document.body.style.fontFamily = t.font;
+
+      // Update UI Text
+      this.uiHeading.textContent = t.heading;
+      this.uiSubheading.textContent = t.subheading;
+      
+      // Update footer if it exists
+      const footer = document.getElementById('disclaimer-footer');
+      if (footer) footer.textContent = t.disclaimer;
+
+      // Update active states
+      if (this.isRecording) {
+        this.statusText.textContent = t.status_recording.replace('{time}', this.formatTime(this.secondsElapsed));
+      } else if (this.statusText.textContent.includes('Processing') || this.statusText.textContent.includes('प्रक्रिया') || this.statusText.textContent.includes('প্রক্রিয়া')) {
+        this.statusText.textContent = t.status_processing;
+      } else if (!this.hasErrorState) {
+        this.statusText.textContent = t.status_start;
+      }
+
+      if (this.hasErrorState) {
+        this.resHeading.textContent = t.status_error;
+        this.startOverBtn.textContent = t.try_again;
+      } else {
+        if (this.lastDetectedEmotion) {
+          this.resHeading.textContent = `${t.response_prefix} ${this.lastDetectedEmotion}`;
+        }
+        this.startOverBtn.textContent = t.start_over;
+      }
     }
     
     getSupportedMimeType() {
@@ -269,31 +619,32 @@
     }
 
     updateTimerDisplay() {
-      this.statusText.textContent = `Recording… ${this.formatTime(this.secondsElapsed)}`;
+      const t = i18n[this.currentLang];
+      this.statusText.textContent = t.status_recording.replace('{time}', this.formatTime(this.secondsElapsed));
     }
 
     stopRecording() {
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.stop();
-        // Also stop all mic tracks
         this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
       }
       this.isRecording = false;
       this.recordView.classList.remove('is-recording');
       clearInterval(this.timerInterval);
-      // 6. Ensure Start Over button says Start Over
-      this.startOverBtn.textContent = "Start over";
     }
 
     async handleStop() {
       const mimeType = this.getSupportedMimeType();
       const audioBlob = new Blob(this.audioChunks, { type: mimeType });
+      const t = i18n[this.currentLang];
       
-      this.statusText.textContent = "Processing…";
+      this.statusText.textContent = t.status_processing;
       
       try {
         const formData = new FormData();
         formData.append('audio', audioBlob);
+        // Append the language code to the backend request
+        formData.append('language', this.currentLang);
 
         const response = await fetch('/api/mood', {
           method: 'POST',
@@ -309,45 +660,45 @@
         
       } catch (err) {
         console.error("Error posting audio:", err);
+        this.hasErrorState = true;
         
-        // Global error boundary: transition to response view with error state
+        // Global error boundary
         this.recordView.classList.add('hidden');
         this.responseView.classList.remove('hidden');
         this.responseView.classList.add('flex');
         
-        this.resHeading.textContent = "Something went wrong. Please try again.";
+        this.resHeading.textContent = t.status_error;
         this.resHeading.classList.add('text-red-600');
         
         this.resContentArea.innerHTML = '';
         this.breathingCircleContainer.classList.add('hidden');
         this.distressBox.classList.add('hidden');
         
-        this.startOverBtn.textContent = "Try again";
+        this.startOverBtn.textContent = t.try_again;
         this.statusText.textContent = "";
       }
     }
 
     renderResponse(data) {
-      // 1. Hide record view, show response view
+      this.hasErrorState = false;
+      const t = i18n[this.currentLang];
+      this.lastDetectedEmotion = data.emotion;
+
       this.recordView.classList.add('hidden');
       this.responseView.classList.remove('hidden');
       this.responseView.classList.add('flex');
 
-      // 2. Set Heading
-      this.resHeading.textContent = `I hear you’re feeling: ${data.emotion}`;
+      this.resHeading.textContent = `${t.response_prefix} ${data.emotion}`;
       this.resHeading.classList.remove('text-red-600');
 
-      // 3. Clear previous content
       this.resContentArea.innerHTML = '';
       this.breathingCircleContainer.classList.add('hidden');
       this.distressBox.classList.add('hidden');
 
-      // 4. Render main content based on type
       if (data.responseType === 'breathing') {
-        // Steps
         const stepsContainer = document.createElement('div');
         stepsContainer.className = "breathing-steps";
-        // Convert plain text steps to HTML lines
+        
         const lines = data.content.split('\n').filter(l => l.trim().length > 0);
         lines.forEach(line => {
           const p = document.createElement('p');
@@ -355,40 +706,39 @@
           stepsContainer.appendChild(p);
         });
         
-        // Reduced motion fallback labels
         const reducedLabel = document.createElement('div');
         reducedLabel.className = 'reduced-motion-steps';
         reducedLabel.textContent = "Inhale (4s) • Hold (1s) • Exhale (4s) • Hold (1s)";
         stepsContainer.appendChild(reducedLabel);
 
         this.resContentArea.appendChild(stepsContainer);
-
-        // Show circle
         this.breathingCircleContainer.classList.remove('hidden');
       } else {
-        // Calming text
         const textContainer = document.createElement('p');
         textContainer.className = "calming-text";
         textContainer.textContent = data.content;
         this.resContentArea.appendChild(textContainer);
       }
 
-      // 5. Distress Message
       if (data.includeDistressMessage && data.distressMessage) {
         this.distressBox.textContent = data.distressMessage;
         this.distressBox.classList.remove('hidden');
       }
+
+      this.startOverBtn.textContent = t.start_over;
     }
 
     resetUI() {
-      // Hide response, show record
+      this.hasErrorState = false;
+      this.lastDetectedEmotion = "";
+      const t = i18n[this.currentLang];
+      
       this.responseView.classList.add('hidden');
       this.responseView.classList.remove('flex');
       
       this.recordView.classList.remove('hidden');
       
-      // Reset statuses
-      this.statusText.textContent = "Tap the microphone to start.";
+      this.statusText.textContent = t.status_start;
       this.hideError();
     }
   }

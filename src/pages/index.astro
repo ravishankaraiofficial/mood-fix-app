@@ -9,13 +9,16 @@ import MoodRecorder from '../components/MoodRecorder.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fff7ed" />
     <title>Mood Relief App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&family=Noto+Sans+Bengali&family=Noto+Sans+Devanagari&family=Noto+Sans+Gujarati&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Kannada&family=Noto+Sans+Malayalam&family=Noto+Sans+Oriya&family=Noto+Sans+Tamil&family=Noto+Sans+Telugu&display=swap" rel="stylesheet">
   </head>
   <body class="min-h-screen flex flex-col items-center justify-center p-6 bg-orange-50 text-ink antialiased pb-20">
     <main class="w-full max-w-[375px] mx-auto flex flex-col items-center text-center">
       <MoodRecorder />
     </main>
 
-    <footer class="fixed bottom-0 left-0 w-full p-4 text-center text-xs text-orange-900/60 bg-orange-50/90 backdrop-blur-sm z-50 border-t border-orange-900/10">
+    <footer id="disclaimer-footer" class="fixed bottom-0 left-0 w-full p-4 text-center text-xs text-orange-900/60 bg-orange-50/90 backdrop-blur-sm z-50 border-t border-orange-900/10 transition-all duration-300">
       This is a calming tool, not medical advice. If you are in crisis, please reach out to someone you trust or a local helpline.
     </footer>
   </body>
