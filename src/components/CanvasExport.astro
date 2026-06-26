@@ -16,11 +16,11 @@
 
 <script>
   // @ts-nocheck
-  import { getMoodLogs } from '../lib/db';
+  import { getRecentMoodLogs } from '../lib/db';
 
   document.getElementById('export-streak-btn')?.addEventListener('click', async () => {
     try {
-      const logs = await getMoodLogs(14);
+      const logs = await getRecentMoodLogs(14 * 24);
       const canvas = document.getElementById('streak-canvas');
       const ctx = canvas.getContext('2d');
       
