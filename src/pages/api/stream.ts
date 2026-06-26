@@ -20,6 +20,7 @@ export const GET: APIRoute = async (context) => {
   
   let audioBuffer: Uint8Array[] = [];
   let languageCode = 'en';
+  let envContext: any = null;
 
   server.addEventListener('message', async (event) => {
     // Text messages for control (start, language, end)
@@ -29,8 +30,9 @@ export const GET: APIRoute = async (context) => {
         if (msg.type === 'start') {
           audioBuffer = [];
           languageCode = msg.language || 'en';
+          envContext = msg.environment || null;
         } else if (msg.type === 'end') {
-          await processAudioWithGemini(audioBuffer, languageCode, server, context.locals);
+          await processAudioWithGemini(audioBuffer, languageCode, envContext, server, context.locals);
         }
       } catch (e) {
         console.error("Invalid WS message format", e);
@@ -48,7 +50,7 @@ export const GET: APIRoute = async (context) => {
   });
 };
 
-async function processAudioWithGemini(chunks: Uint8Array[], langCode: string, ws: WebSocket, locals: any) {
+async function processAudioWithGemini(chunks: Uint8Array[], langCode: string, envContext: any, ws: WebSocket, locals: any) {
   // Combine the streamed chunks
   const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
   const combined = new Uint8Array(totalLength);
@@ -64,7 +66,7 @@ async function processAudioWithGemini(chunks: Uint8Array[], langCode: string, ws
   const languageNames: Record<string, string> = {
     en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", mr: "Marathi", ta: "Tamil", gu: "Gujarati", ur: "Urdu", kn: "Kannada", or: "Odia", ml: "Malayalam", pa: "Punjabi", as: "Assamese"
   };
-  const systemPrompt = buildSystemPrompt(languageNames[langCode] || "English");
+  const systemPrompt = buildSystemPrompt(languageNames[langCode] || "English", envContext);
   
   try {
     // In Astro on Cloudflare, env vars are often on locals.runtime.env or import.meta.env

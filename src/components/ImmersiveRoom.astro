@@ -1,0 +1,138 @@
+---
+// src/components/ImmersiveRoom.astro
+---
+<div id="immersive-room-overlay" class="fixed inset-0 z-[100] hidden bg-black overflow-hidden pointer-events-none opacity-0 transition-opacity duration-1000">
+  <div id="immersive-scene" class="absolute inset-0 w-full h-full transform-style-3d perspective-[800px] flex items-center justify-center">
+     <!-- CSS 3D Skybox / Magic Window approximation -->
+     <div id="immersive-camera" class="relative w-0 h-0 transform-style-3d transition-transform duration-75 ease-out">
+        <!-- Front -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] translate-z-[1000px] bg-gradient-to-b from-sky-400 to-teal-900 opacity-80 blur-sm"></div>
+        <!-- Back -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] -translate-z-[1000px] rotate-y-180 bg-gradient-to-b from-sky-400 to-teal-900 opacity-80 blur-sm"></div>
+        <!-- Left -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] -translate-x-[1000px] -rotate-y-90 bg-gradient-to-b from-sky-400 to-teal-900 opacity-80 blur-sm"></div>
+        <!-- Right -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] translate-x-[1000px] rotate-y-90 bg-gradient-to-b from-sky-400 to-teal-900 opacity-80 blur-sm"></div>
+        <!-- Top -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] -translate-y-[1000px] rotate-x-90 bg-sky-400 opacity-80 blur-sm"></div>
+        <!-- Bottom -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-[2000px] h-[2000px] translate-y-[1000px] -rotate-x-90 bg-teal-900 opacity-80 blur-sm"></div>
+        
+        <!-- Spatial Anchors (Floating particles for depth reference) -->
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white/20 backdrop-blur-md border border-white/50 rounded-full translate-z-[400px] shadow-[0_0_30px_rgba(255,255,255,0.5)] flex items-center justify-center">
+            <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+        </div>
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white/20 backdrop-blur-md border border-white/50 rounded-full -translate-x-[400px] translate-y-[200px] translate-z-[300px] shadow-[0_0_20px_rgba(255,255,255,0.4)]"></div>
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-md border border-white/50 rounded-full translate-x-[300px] -translate-y-[150px] -translate-z-[300px] shadow-[0_0_20px_rgba(255,255,255,0.4)]"></div>
+     </div>
+  </div>
+  
+  <div class="absolute bottom-12 left-1/2 -translate-x-1/2 z-10">
+    <button id="close-immersive-btn" class="px-8 py-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-full text-white font-medium hover:bg-white/20 transition-all pointer-events-auto shadow-2xl flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      Leave Space
+    </button>
+  </div>
+</div>
+
+<style>
+  .transform-style-3d { transform-style: preserve-3d; }
+  .perspective-\[800px\] { perspective: 800px; }
+  .translate-z-\[1000px\] { transform: translateZ(1000px); }
+  .-translate-z-\[1000px\] { transform: translateZ(-1000px); }
+  .translate-z-\[400px\] { transform: translateZ(400px); }
+  .-translate-z-\[300px\] { transform: translateZ(-300px); }
+  .translate-z-\[300px\] { transform: translateZ(300px); }
+  .rotate-y-180 { transform: rotateY(180deg); }
+  .rotate-y-90 { transform: rotateY(90deg); }
+  .-rotate-y-90 { transform: rotateY(-90deg); }
+  .rotate-x-90 { transform: rotateX(90deg); }
+  .-rotate-x-90 { transform: rotateX(-90deg); }
+</style>
+
+<script>
+  // @ts-nocheck
+  let orientationHandler = null;
+  // Fallback spatial audio using Web Audio API
+  let audioCtx = null;
+  let oscillator = null;
+  let gainNode = null;
+
+  window.startImmersiveRoom = () => {
+    const overlay = document.getElementById('immersive-room-overlay');
+    const cam = document.getElementById('immersive-camera');
+    
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      overlay.classList.remove('pointer-events-none');
+    });
+
+    const handleOrientation = (e) => {
+      // Basic magic window mapping
+      let alpha = e.alpha || 0; 
+      let beta = e.beta || 0;   
+      let gamma = e.gamma || 0; 
+      
+      // Keep within bounds for a smooth experience
+      if (beta > 90) beta = 90;
+      if (beta < -90) beta = -90;
+
+      cam.style.transform = `rotateX(${beta - 90}deg) rotateY(${alpha}deg) rotateZ(${-gamma}deg)`;
+    };
+
+    if (window.DeviceOrientationEvent) {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(state => {
+          if (state === 'granted') {
+             window.addEventListener('deviceorientation', handleOrientation);
+             orientationHandler = handleOrientation;
+          }
+        }).catch(e => console.log('DeviceOrientation permission denied'));
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        orientationHandler = handleOrientation;
+      }
+    }
+
+    // Spatial drone sound
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      oscillator = audioCtx.createOscillator();
+      gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.value = 174; // Solfeggio healing frequency
+      
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 3);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      oscillator.start();
+    } catch(e) {}
+  };
+
+  document.getElementById('close-immersive-btn')?.addEventListener('click', () => {
+    const overlay = document.getElementById('immersive-room-overlay');
+    overlay.classList.add('opacity-0');
+    overlay.classList.add('pointer-events-none');
+    
+    if (gainNode && audioCtx) {
+       gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+       setTimeout(() => oscillator?.stop(), 1000);
+    }
+
+    setTimeout(() => {
+       overlay.classList.add('hidden');
+       if (window.resetMoodRecorderUI) window.resetMoodRecorderUI();
+    }, 1000);
+    
+    if (orientationHandler) {
+      window.removeEventListener('deviceorientation', orientationHandler);
+      orientationHandler = null;
+    }
+  });
+</script>

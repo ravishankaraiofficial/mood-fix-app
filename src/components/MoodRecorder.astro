@@ -3,6 +3,8 @@
 import CrisisHandoff from './CrisisHandoff.astro';
 import ErgonomicReset from './ErgonomicReset.astro';
 import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
+import OpticalVitals from './OpticalVitals.astro';
+import ImmersiveRoom from './ImmersiveRoom.astro';
 ---
 
 <mood-recorder class="w-full flex flex-col items-center pt-2 relative">
@@ -50,6 +52,7 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
   </nav>
 
   <VoiceFluidCanvas />
+  <OpticalVitals />
 
   <!-- Breathing Circle -->
   <div class="relative w-48 h-48 mx-auto mb-8 flex justify-center items-center">
@@ -116,6 +119,7 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
   </div>
   
   <ErgonomicReset />
+  <ImmersiveRoom />
   
   <div id="lang-toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-orange-900/95 backdrop-blur-sm text-orange-50 px-6 py-3 rounded-full text-sm font-medium shadow-xl pointer-events-none transition-all duration-300 opacity-0 translate-y-4 z-50 flex items-center gap-2">
     <span id="lang-toast-text"></span>
@@ -172,6 +176,7 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
   import { toggleSoundscape, updateSoundscape } from '../lib/audioEngine';
   import { SympathySyncClient } from '../lib/webrtc';
   import { startHapticPacing, stopHapticPacing } from '../lib/haptics';
+  import { getEnvironmentalContext } from '../lib/environment';
   
   const i18n = {
     en: { langName: "English", heading: "Tell me how you’re feeling", status_start: "Tap the microphone to start.", status_recording: "Recording… {time}", status_processing: "Processing…", status_error: "Something went wrong.", response_prefix: "I hear you’re feeling:" },
@@ -192,11 +197,21 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
       this.partnerCircle = this.querySelector('#partner-circle');
       this.breathingCircle = this.querySelector('#breathing-circle');
 
+      this.mediaRecorder = null;
       this.isRecording = false;
-      this.soundscapePlaying = false;
-      this.currentLang = 'en';
-      this.syncClient = null;
+      this.currentLang = localStorage.getItem('moodLang') || 'en';
+      this.envContext = null;
+      this.ws = null;
       
+      // Fetch stateless environment on init
+      getEnvironmentalContext().then(ctx => {
+        this.envContext = ctx;
+      });
+
+      this.init();
+    }
+
+    init() {
       this.setupLanguageBar();
       this.btn.addEventListener('click', () => this.toggleRecording());
       this.startOverBtn.addEventListener('click', () => this.resetUI());
@@ -312,14 +327,19 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
     async startRecording() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.mediaRecorder = new MediaRecorder(stream);
         
-        // Connect WebSocket
+        // Use wss for secure socket connection
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         this.ws = new WebSocket(`${protocol}//${window.location.host}/api/stream`);
         
         this.ws.onopen = () => {
-          this.ws.send(JSON.stringify({ type: 'start', language: this.currentLang }));
+          this.ws.send(JSON.stringify({ 
+             type: 'start', 
+             language: this.currentLang,
+             environment: this.envContext 
+          }));
+          
+          this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
           this.mediaRecorder.ondataavailable = (e) => {
             if (e.data.size > 0 && this.ws.readyState === WebSocket.OPEN) {
               this.ws.send(e.data); // Stream raw binary
@@ -329,6 +349,7 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
           this.isRecording = true;
           this.querySelector('#record-view').classList.add('is-recording');
           if (window.startVoiceFluid) window.startVoiceFluid(stream);
+          if (window.startOpticalVitals) window.startOpticalVitals();
         };
 
         this.ws.onmessage = async (e) => {
@@ -357,6 +378,7 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
       this.querySelector('#record-view').classList.remove('is-recording');
       this.querySelector('#status-text').textContent = "Processing…";
       if (window.stopVoiceFluid) window.stopVoiceFluid();
+      if (window.stopOpticalVitals) window.stopOpticalVitals();
     }
 
     renderResponse(data) {
@@ -364,6 +386,11 @@ import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
       
       if (data.responseType === 'ergonomic_reset') {
          if (window.startErgonomicReset) window.startErgonomicReset(this.currentLang);
+         return; // Skip standard response rendering
+      }
+      
+      if (data.responseType === 'immersive_room') {
+         if (window.startImmersiveRoom) window.startImmersiveRoom();
          return; // Skip standard response rendering
       }
       

@@ -1,0 +1,122 @@
+---
+// src/components/OpticalVitals.astro
+---
+<div id="optical-vitals-container" class="hidden flex-col items-center justify-center p-4 bg-slate-900/40 rounded-3xl border border-slate-700/50 backdrop-blur-md w-full max-w-sm mx-auto mt-6 transition-all shadow-2xl relative z-10">
+  <div class="relative w-28 h-28 rounded-full overflow-hidden border-4 border-slate-800 bg-black shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+    <!-- Camera Feed -->
+    <video id="vitals-video" class="absolute inset-0 w-full h-full object-cover transform -scale-x-100 opacity-60 mix-blend-screen" playsinline autoplay muted></video>
+    
+    <!-- Privacy Lock Overlay -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/30 z-10 pointer-events-none">
+      <svg class="w-8 h-8 text-emerald-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+      <span class="text-[9px] text-emerald-400 font-bold tracking-widest uppercase mt-1">Local Only</span>
+    </div>
+  </div>
+  
+  <div class="mt-4 flex flex-col items-center">
+    <div class="flex items-baseline gap-1.5">
+      <svg class="w-5 h-5 text-rose-500 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+         <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" />
+      </svg>
+      <span id="vitals-bpm" class="text-3xl font-bold text-white tabular-nums tracking-tight">--</span>
+      <span class="text-xs text-slate-400 uppercase font-semibold">BPM</span>
+    </div>
+    <span class="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-medium">Optical Est.</span>
+  </div>
+  <canvas id="vitals-canvas" class="hidden" width="32" height="32"></canvas>
+</div>
+
+<script>
+  // @ts-nocheck
+  let stream = null;
+  let animId = null;
+  let buffer = [];
+  
+  window.startOpticalVitals = async () => {
+    const container = document.getElementById('optical-vitals-container');
+    const video = document.getElementById('vitals-video');
+    const canvas = document.getElementById('vitals-canvas');
+    const bpmTxt = document.getElementById('vitals-bpm');
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      video.srcObject = stream;
+      container.classList.remove('hidden');
+      container.classList.add('flex');
+      
+      video.onloadedmetadata = () => {
+        video.play();
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        let lastTime = performance.now();
+        
+        const loop = (time) => {
+          if (!stream) return;
+          
+          if (time - lastTime > 33) { // ~30fps max
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = frame.data;
+            let greenSum = 0;
+            
+            // Extract Green Channel from entire low-res canvas
+            for (let i = 0; i < data.length; i += 4) {
+              greenSum += data[i + 1]; 
+            }
+            
+            const avgGreen = greenSum / (data.length / 4);
+            buffer.push({ time, val: avgGreen });
+            
+            // 5 second rolling window (5000ms)
+            buffer = buffer.filter(b => time - b.time < 5000);
+            
+            if (buffer.length > 50) {
+              // Basic zero-crossing / peak detection
+              let peaks = 0;
+              let movingAvg = buffer.reduce((a, b) => a + b.val, 0) / buffer.length;
+              
+              for (let i = 1; i < buffer.length - 1; i++) {
+                if (buffer[i].val > buffer[i-1].val && buffer[i].val > buffer[i+1].val && buffer[i].val > movingAvg) {
+                  peaks++;
+                }
+              }
+              
+              let estBpm = Math.round(peaks * (60 / 5));
+              // Sanity bound filter
+              if (estBpm > 45 && estBpm < 150) {
+                 bpmTxt.textContent = estBpm;
+                 // Sync breathing CSS var if in range
+                 if (document.documentElement.style) {
+                   const duration = Math.max(2, 60 / estBpm);
+                   document.documentElement.style.setProperty('--breathe-duration', `${duration}s`);
+                 }
+              }
+            }
+            lastTime = time;
+          }
+          animId = requestAnimationFrame(loop);
+        };
+        
+        animId = requestAnimationFrame(loop);
+      };
+    } catch(e) {
+      console.log('Camera access denied or unavailable for rPPG. Gracefully degrading.');
+    }
+  };
+  
+  window.stopOpticalVitals = () => {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    if (animId) cancelAnimationFrame(animId);
+    buffer = [];
+    document.getElementById('optical-vitals-container')?.classList.add('hidden');
+    document.getElementById('optical-vitals-container')?.classList.remove('flex');
+    document.getElementById('vitals-bpm').textContent = '--';
+  };
+</script>
