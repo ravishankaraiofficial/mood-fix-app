@@ -1,0 +1,117 @@
+---
+// src/components/ThemeRewards.astro
+---
+
+<div id="theme-rewards" class="w-full bg-white p-6 rounded-2xl shadow-sm border border-orange-100 mt-6">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-semibold text-orange-900">Wellness Themes</h3>
+    <div class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-bold shadow-sm border border-orange-200">
+      <span id="streak-counter">0</span> Day Streak 🔥
+    </div>
+  </div>
+
+  <p class="text-xs text-orange-800/70 mb-4">Themes unlock as you build consistent habits. They are applied privately to your local device.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="theme-list">
+    <!-- Default Theme -->
+    <button data-theme="default" data-unlock="0" class="theme-btn relative p-4 rounded-xl border-2 border-orange-400 bg-orange-50 text-left transition-all hover:border-orange-500">
+      <span class="block font-bold text-orange-900 mb-1">Warm Default</span>
+      <span class="text-xs text-orange-800 font-medium">Active</span>
+    </button>
+    
+    <!-- Deep Ocean Calm -->
+    <button data-theme="theme-deep-ocean" data-unlock="3" class="theme-btn relative p-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-left transition-all opacity-50 grayscale pointer-events-none">
+      <span class="block font-bold text-gray-900 mb-1">Deep Ocean Calm</span>
+      <span class="text-xs text-gray-500 font-medium">🔒 Unlocks at 3 Days</span>
+    </button>
+
+    <!-- Midnight Forest -->
+    <button data-theme="theme-midnight-forest" data-unlock="7" class="theme-btn relative p-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-left transition-all opacity-50 grayscale pointer-events-none">
+      <span class="block font-bold text-gray-900 mb-1">Midnight Forest</span>
+      <span class="text-xs text-gray-500 font-medium">🔒 Unlocks at 7 Days</span>
+    </button>
+
+    <!-- Desert Dawn -->
+    <button data-theme="theme-desert-dawn" data-unlock="14" class="theme-btn relative p-4 rounded-xl border-2 border-gray-200 bg-gray-50 text-left transition-all opacity-50 grayscale pointer-events-none">
+      <span class="block font-bold text-gray-900 mb-1">Desert Dawn</span>
+      <span class="text-xs text-gray-500 font-medium">🔒 Unlocks at 14 Days</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  import { calculateStreak } from '../lib/streaks';
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    const streak = await calculateStreak();
+    document.getElementById('streak-counter').textContent = streak;
+
+    const savedTheme = localStorage.getItem('moodReliefTheme') || 'default';
+
+    const btns = document.querySelectorAll('.theme-btn');
+    
+    // Function to update visual selection states
+    const updateSelectionUI = (selectedTheme) => {
+      btns.forEach(b => {
+        const t = b.getAttribute('data-theme');
+        if (t === selectedTheme) {
+          b.classList.add('ring-2', 'ring-offset-2');
+          // Adjust ring color based on theme
+          if(t === 'theme-deep-ocean') b.classList.add('ring-[#00e5ff]');
+          else if(t === 'theme-midnight-forest') b.classList.add('ring-[#50C878]');
+          else if(t === 'theme-desert-dawn') b.classList.add('ring-[#d96638]');
+          else b.classList.add('ring-orange-400');
+        } else {
+          b.className = b.className.replace(/ring-2 ring-offset-2 ring-\[[^\]]+\] ring-orange-400/g, '').trim();
+        }
+      });
+    };
+
+    btns.forEach(btn => {
+      const required = parseInt(btn.getAttribute('data-unlock'));
+      const themeClass = btn.getAttribute('data-theme');
+      
+      if (streak >= required) {
+        // Unlock visually
+        btn.classList.remove('opacity-50', 'grayscale', 'pointer-events-none', 'border-gray-200', 'bg-gray-50');
+        
+        // Custom button styling per theme
+        if (themeClass === 'theme-deep-ocean') {
+          btn.classList.add('border-[#003366]', 'bg-[#001f3f]');
+          btn.querySelector('.text-gray-900').classList.replace('text-gray-900', 'text-[#00e5ff]');
+        } else if (themeClass === 'theme-midnight-forest') {
+          btn.classList.add('border-[#0a2f1c]', 'bg-[#051a0e]');
+          btn.querySelector('.text-gray-900').classList.replace('text-gray-900', 'text-[#50C878]');
+        } else if (themeClass === 'theme-desert-dawn') {
+          btn.classList.add('border-[#8c4a32]', 'bg-[#fff0e6]');
+          btn.querySelector('.text-gray-900').classList.replace('text-gray-900', 'text-[#b35938]');
+        }
+
+        // Only set unlocked text if it's not the default warm one
+        if (themeClass !== 'default') {
+            btn.querySelector('.text-xs').textContent = 'Unlocked';
+            btn.querySelector('.text-xs').classList.replace('text-gray-500', 'text-gray-400');
+        }
+        
+        // Selection Logic
+        btn.addEventListener('click', () => {
+          document.documentElement.className = ''; // wipe current themes
+          if (themeClass !== 'default') {
+            document.documentElement.classList.add(themeClass);
+          } else {
+            // Check circadian if reverting to default
+            const h = new Date().getHours();
+            if (h >= 21 || h < 6) {
+              document.documentElement.classList.add('theme-night');
+            }
+          }
+          localStorage.setItem('moodReliefTheme', themeClass);
+          updateSelectionUI(themeClass);
+        });
+      }
+    });
+
+    updateSelectionUI(savedTheme);
+  });
+</script>

@@ -13,9 +13,14 @@ import PMRSequence from '../components/PMRSequence.astro';
     <meta name="generator" content={Astro.generator} />
     <title>Mood Relief - You are not alone</title>
     <script is:inline>
-      const h = new Date().getHours();
-      if (h >= 21 || h < 6) {
-        document.documentElement.classList.add('theme-night');
+      const savedTheme = localStorage.getItem('moodReliefTheme');
+      if (savedTheme && savedTheme !== 'default') {
+        document.documentElement.classList.add(savedTheme);
+      } else {
+        const h = new Date().getHours();
+        if (h >= 21 || h < 6) {
+          document.documentElement.classList.add('theme-night');
+        }
       }
     </script>
     <!-- Offline-First PWA Registration -->
@@ -37,6 +42,45 @@ import PMRSequence from '../components/PMRSequence.astro';
       html.theme-night .bg-orange-500 { background-color: #9f1239 !important; /* Crimson */ }
       html.theme-night .bg-white { background-color: #1a0f0f !important; border-color: #3a1515 !important; }
       html.theme-night #lang-toast { background-color: #9f1239 !important; color: #fff !important; }
+      
+      /* Deep Ocean Calm */
+      html.theme-deep-ocean body { background-color: #001f3f !important; color: #00e5ff !important; }
+      html.theme-deep-ocean .bg-orange-50 { background-color: #001529 !important; }
+      html.theme-deep-ocean .bg-orange-100 { background-color: #002244 !important; }
+      html.theme-deep-ocean .text-orange-900 { color: #80d4ff !important; }
+      html.theme-deep-ocean .text-orange-800 { color: #4dc3ff !important; }
+      html.theme-deep-ocean .border-orange-200 { border-color: #003366 !important; }
+      html.theme-deep-ocean .bg-orange-500 { background-color: #00bfff !important; }
+      html.theme-deep-ocean .bg-white { background-color: #001529 !important; border-color: #002244 !important; }
+      html.theme-deep-ocean #lang-toast { background-color: #00bfff !important; color: #fff !important; }
+      html.theme-deep-ocean #breathing-circle { background-color: #00e5ff !important; box-shadow: 0 0 20px #00e5ff !important; mix-blend-mode: normal !important; opacity: 0.9 !important; }
+      html.theme-deep-ocean #partner-circle { background-color: #80d4ff !important; mix-blend-mode: normal !important; }
+
+      /* Midnight Forest */
+      html.theme-midnight-forest body { background-color: #051a0e !important; color: #50c878 !important; }
+      html.theme-midnight-forest .bg-orange-50 { background-color: #03140a !important; }
+      html.theme-midnight-forest .bg-orange-100 { background-color: #082615 !important; }
+      html.theme-midnight-forest .text-orange-900 { color: #80e5a6 !important; }
+      html.theme-midnight-forest .text-orange-800 { color: #50c878 !important; }
+      html.theme-midnight-forest .border-orange-200 { border-color: #0a2f1c !important; }
+      html.theme-midnight-forest .bg-orange-500 { background-color: #2e8b57 !important; }
+      html.theme-midnight-forest .bg-white { background-color: #03140a !important; border-color: #082615 !important; }
+      html.theme-midnight-forest #lang-toast { background-color: #2e8b57 !important; color: #fff !important; }
+      html.theme-midnight-forest #breathing-circle { background-color: #50c878 !important; box-shadow: 0 0 20px #50c878 !important; mix-blend-mode: normal !important; opacity: 0.9 !important; }
+      html.theme-midnight-forest #partner-circle { background-color: #80e5a6 !important; mix-blend-mode: normal !important; }
+
+      /* Desert Dawn */
+      html.theme-desert-dawn body { background-color: #fff0e6 !important; color: #b35938 !important; }
+      html.theme-desert-dawn .bg-orange-50 { background-color: #ffe6d9 !important; }
+      html.theme-desert-dawn .bg-orange-100 { background-color: #ffcca6 !important; }
+      html.theme-desert-dawn .text-orange-900 { color: #8c4a32 !important; }
+      html.theme-desert-dawn .text-orange-800 { color: #b35938 !important; }
+      html.theme-desert-dawn .border-orange-200 { border-color: #ffb380 !important; }
+      html.theme-desert-dawn .bg-orange-500 { background-color: #d96638 !important; }
+      html.theme-desert-dawn .bg-white { background-color: #fff9f5 !important; border-color: #ffcca6 !important; }
+      html.theme-desert-dawn #lang-toast { background-color: #d96638 !important; color: #fff !important; }
+      html.theme-desert-dawn #breathing-circle { background-color: #ff9966 !important; box-shadow: 0 0 20px #ff9966 !important; mix-blend-mode: normal !important; opacity: 0.9 !important; }
+      html.theme-desert-dawn #partner-circle { background-color: #ffb380 !important; mix-blend-mode: normal !important; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
