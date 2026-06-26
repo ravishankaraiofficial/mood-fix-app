@@ -1,6 +1,8 @@
 ---
 // src/components/MoodRecorder.astro
 import CrisisHandoff from './CrisisHandoff.astro';
+import ErgonomicReset from './ErgonomicReset.astro';
+import VoiceFluidCanvas from './VoiceFluidCanvas.astro';
 ---
 
 <mood-recorder class="w-full flex flex-col items-center pt-2 relative">
@@ -46,6 +48,8 @@ import CrisisHandoff from './CrisisHandoff.astro';
     <button type="button" class="lang-btn" data-lang="pa">ਪੰਜਾਬੀ</button>
     <button type="button" class="lang-btn" data-lang="as">অসমীয়া</button>
   </nav>
+
+  <VoiceFluidCanvas />
 
   <!-- Breathing Circle -->
   <div class="relative w-48 h-48 mx-auto mb-8 flex justify-center items-center">
@@ -110,6 +114,8 @@ import CrisisHandoff from './CrisisHandoff.astro';
       Start over
     </button>
   </div>
+  
+  <ErgonomicReset />
   
   <div id="lang-toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-orange-900/95 backdrop-blur-sm text-orange-50 px-6 py-3 rounded-full text-sm font-medium shadow-xl pointer-events-none transition-all duration-300 opacity-0 translate-y-4 z-50 flex items-center gap-2">
     <span id="lang-toast-text"></span>
@@ -209,6 +215,8 @@ import CrisisHandoff from './CrisisHandoff.astro';
           }
         }
       }, 100);
+      
+      window.resetMoodRecorderUI = () => this.resetUI();
     }
 
     async connectSympathySync() {
@@ -320,6 +328,7 @@ import CrisisHandoff from './CrisisHandoff.astro';
           this.mediaRecorder.start(500); // 500ms chunks
           this.isRecording = true;
           this.querySelector('#record-view').classList.add('is-recording');
+          if (window.startVoiceFluid) window.startVoiceFluid(stream);
         };
 
         this.ws.onmessage = async (e) => {
@@ -347,10 +356,17 @@ import CrisisHandoff from './CrisisHandoff.astro';
       this.isRecording = false;
       this.querySelector('#record-view').classList.remove('is-recording');
       this.querySelector('#status-text').textContent = "Processing…";
+      if (window.stopVoiceFluid) window.stopVoiceFluid();
     }
 
     renderResponse(data) {
       this.querySelector('#record-view').classList.add('hidden');
+      
+      if (data.responseType === 'ergonomic_reset') {
+         if (window.startErgonomicReset) window.startErgonomicReset(this.currentLang);
+         return; // Skip standard response rendering
+      }
+      
       const rv = this.querySelector('#response-view');
       rv.classList.remove('hidden');
       rv.classList.add('flex');

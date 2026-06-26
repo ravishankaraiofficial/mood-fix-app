@@ -1,0 +1,100 @@
+---
+// src/components/ErgonomicReset.astro
+---
+<div id="ergonomic-reset-module" class="w-full max-w-md mx-auto flex-col items-center justify-center animate-fade-in hidden p-6">
+  <div class="w-32 h-32 rounded-3xl bg-indigo-50 border-2 border-indigo-200 flex items-center justify-center mb-8 shadow-inner overflow-hidden relative mx-auto">
+    <!-- Visual Metaphor: Stretching -->
+    <svg id="ergo-icon" class="w-16 h-16 text-indigo-400 transition-transform duration-1000 ease-in-out" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+    <div id="ergo-pulse" class="absolute inset-0 rounded-3xl border-2 border-indigo-400 opacity-0 pointer-events-none"></div>
+  </div>
+  
+  <h2 class="text-2xl font-bold text-indigo-900 mb-2 text-center">Physical Reset</h2>
+  <p id="ergo-instruction" class="text-lg text-indigo-700 text-center px-4 font-medium h-16 transition-opacity duration-500 flex items-center justify-center">
+    Step away from the screen.
+  </p>
+  
+  <div class="w-full max-w-[240px] h-3 bg-indigo-50 border border-indigo-100 rounded-full mt-8 overflow-hidden mx-auto">
+    <div id="ergo-progress" class="h-full bg-indigo-400 w-0 transition-all duration-[1000ms] ease-linear"></div>
+  </div>
+</div>
+
+<style>
+  @keyframes ergo-pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.2); opacity: 0; }
+  }
+  .animate-ergo-pulse {
+    animation: ergo-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  }
+</style>
+
+<script>
+  // @ts-nocheck
+  let currentErgoInterval = null;
+
+  window.startErgonomicReset = (lang) => {
+    const mod = document.getElementById('ergonomic-reset-module');
+    mod.classList.remove('hidden');
+    mod.classList.add('flex');
+    
+    document.getElementById('ergo-pulse').classList.add('animate-ergo-pulse');
+    
+    const instructions = [
+      "Look 20 feet away to relax eye strain.",
+      "Roll your shoulders back and down.",
+      "Gently stretch your neck left to right.",
+      "Shake out your hands and wrists."
+    ];
+    
+    let step = 0;
+    const txt = document.getElementById('ergo-instruction');
+    const prog = document.getElementById('ergo-progress');
+    const icon = document.getElementById('ergo-icon');
+    
+    const runStep = () => {
+      if (step >= instructions.length) {
+         clearInterval(currentErgoInterval);
+         txt.textContent = "Reset complete. You're doing great.";
+         prog.style.width = '100%';
+         document.getElementById('ergo-pulse').classList.remove('animate-ergo-pulse');
+         
+         // Return to normal
+         setTimeout(() => {
+            mod.classList.remove('flex');
+            mod.classList.add('hidden');
+            if (window.resetMoodRecorderUI) window.resetMoodRecorderUI();
+         }, 3000);
+         return;
+      }
+      
+      const text = instructions[step];
+      txt.style.opacity = '0';
+      
+      setTimeout(() => {
+        txt.textContent = text;
+        txt.style.opacity = '1';
+        
+        // Speak instruction
+        if ('speechSynthesis' in window) {
+           window.speechSynthesis.cancel();
+           const utterance = new SpeechSynthesisUtterance(text);
+           utterance.lang = lang || 'en';
+           utterance.rate = 0.9;
+           window.speechSynthesis.speak(utterance);
+        }
+        
+        // Move icon to simulate stretching
+        icon.style.transform = `scale(${1 + (step%2)*0.1}) rotate(${(step%2 === 0 ? 8 : -8)}deg)`;
+        
+      }, 500);
+      
+      prog.style.width = `${(step / instructions.length) * 100}%`;
+      step++;
+    };
+    
+    runStep(); // 0s
+    currentErgoInterval = setInterval(runStep, 15000); // 15s each
+  };
+</script>
