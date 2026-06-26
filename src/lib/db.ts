@@ -81,10 +81,10 @@ export async function getRecentMoodLogs(hours: number = 24) {
 }
 
 // Journals API
-export async function saveJournal(text: string, tags: string[]) {
+export async function saveJournal(text: string, tags: string[], embedding?: number[]) {
   try {
     const key = await generateLocalKey();
-    const payload = { text, tags };
+    const payload = { text, tags, embedding };
     const { iv, ciphertext } = await encryptData(payload, key);
     
     const db = await openDB();

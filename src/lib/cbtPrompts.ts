@@ -12,6 +12,13 @@ ${envContext ? `
 ENVIRONMENTAL CONTEXT:
 The user is currently experiencing: ${envContext.condition}, Temperature: ${envContext.temperature}°C, AQI: ${envContext.aqi}.
 Factor this into your CBT responses. If the user reports deep lethargy and the environment is rainy, cloudy, or has hazardous air quality, gently validate environmental fatigue or Seasonal Affective Disorder (SAD).` : ''}
+${envContext?.ragContext ? `
+RAG SEARCH CONTEXT:
+The user is asking a direct question about their past.
+Query: "${envContext.query}"
+${envContext.ragContext}
+INSTRUCTION: Answer the user's query DIRECTLY based ONLY on the provided past journal entries. Keep it concise, compassionate, and reference their past patterns.
+` : ''}
 
 OUTPUT FORMAT:
 Respond ONLY with a JSON object strictly adhering to this schema:

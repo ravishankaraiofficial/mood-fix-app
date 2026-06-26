@@ -3,6 +3,7 @@
 import '../styles/global.css';
 import MoodRecorder from '../components/MoodRecorder.astro';
 import AnalyticsTab from '../components/AnalyticsTab.astro';
+import ForecastingAlert from '../components/ForecastingAlert.astro';
 import VoiceJournal from '../components/VoiceJournal.astro';
 import PMRSequence from '../components/PMRSequence.astro';
 import BilateralStimulation from '../components/BilateralStimulation.astro';
@@ -97,8 +98,9 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
       </button>
     </header>
 
-    <main class="w-full max-w-[375px] mx-auto flex flex-col items-center text-center">
+    <main id="dashboard" class="relative z-10 w-full max-w-lg mx-auto pt-8 pb-32 px-4 space-y-4">
       <MoodRecorder />
+      <ForecastingAlert />
       <AnalyticsTab />
       <VoiceJournal />
       <PMRSequence />

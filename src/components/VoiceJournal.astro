@@ -30,6 +30,15 @@
       Save Encrypted
     </button>
   </div>
+
+  <div class="mt-8 border-t border-orange-100 pt-6">
+    <h4 class="text-lg font-semibold text-orange-900 mb-2">Chat with your past self</h4>
+    <div class="flex gap-2">
+       <input id="rag-query" type="text" class="flex-1 p-3 border border-orange-200 rounded-xl bg-orange-50/50 text-orange-900 placeholder:text-orange-900/40 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-shadow text-sm" placeholder="e.g. How did I handle stress last month?">
+       <button id="rag-search-btn" class="px-5 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm active:scale-95">Ask</button>
+    </div>
+    <div id="rag-response" class="mt-4 p-4 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-900 hidden text-sm leading-relaxed"></div>
+  </div>
 </div>
 
 <script>
@@ -135,18 +144,24 @@
   // Live text parsing for manual typing
   textArea.addEventListener('input', () => extractTags(textArea.value));
 
-  // Save to IndexedDB
+  // Save to IndexedDB with Vector Embedding
   saveBtn.addEventListener('click', async () => {
     if (!textArea.value.trim()) return;
-    saveBtn.textContent = 'Encrypting...';
+    saveBtn.textContent = 'Generating Embedding...';
     saveBtn.disabled = true;
     
-    const success = await saveJournal(textArea.value, extractedTags);
+    // Aggressively lazy load the transformer module
+    const { generateEmbedding } = await import('../lib/ragEngine');
+    const embedding = await generateEmbedding(textArea.value);
+    
+    saveBtn.textContent = 'Encrypting...';
+    const success = await saveJournal(textArea.value, extractedTags, embedding);
+    
     if (success) {
       textArea.value = '';
       tagsContainer.innerHTML = '';
       extractedTags = [];
-      saveBtn.textContent = 'Saved!';
+      saveBtn.textContent = 'Saved Locally!';
       setTimeout(() => {
         saveBtn.textContent = 'Save Encrypted';
         saveBtn.disabled = false;
@@ -158,5 +173,68 @@
         saveBtn.disabled = false;
       }, 2000);
     }
+  });
+
+  // RAG Semantic Search
+  const ragQuery = document.getElementById('rag-query');
+  const ragSearchBtn = document.getElementById('rag-search-btn');
+  const ragResponse = document.getElementById('rag-response');
+
+  ragSearchBtn.addEventListener('click', async () => {
+    const q = ragQuery.value.trim();
+    if (!q) return;
+    
+    ragSearchBtn.textContent = 'Searching...';
+    ragSearchBtn.disabled = true;
+    ragResponse.classList.remove('hidden');
+    ragResponse.textContent = 'Vectorizing query and searching encrypted logs statelessly...';
+
+    const { getRecentJournals } = await import('../lib/db');
+    const { vectorSearch } = await import('../lib/ragEngine');
+
+    // Get up to 30 days of journals
+    const journals = await getRecentJournals(720);
+    const topEntries = await vectorSearch(q, journals, 3);
+    
+    if (topEntries.length === 0 || topEntries[0].similarity < 0.1) {
+      ragResponse.textContent = "I couldn't find enough past context in your local vault for this question.";
+      ragSearchBtn.textContent = 'Ask';
+      ragSearchBtn.disabled = false;
+      return;
+    }
+
+    let contextStr = "Here are the user's past journal entries relevant to their question:\n\n";
+    topEntries.forEach((entry, i) => {
+       contextStr += `Entry ${i+1} (${new Date(entry.timestamp).toLocaleDateString()}): "${entry.data.text}"\n\n`;
+    });
+    
+    ragResponse.textContent = 'Synthesizing response via secure stream...';
+    
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/api/stream`);
+    
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ 
+         type: 'start', 
+         language: localStorage.getItem('moodReliefLang') || 'en',
+         environment: { ragContext: contextStr, query: q } 
+      }));
+      // send a tiny blank audio chunk to satisfy binary listener
+      ws.send(new Uint8Array([0]));
+      ws.send(JSON.stringify({ type: 'end' }));
+    };
+    
+    ws.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        ragResponse.textContent = data.content;
+      } catch(err) {}
+      ws.close();
+    };
+    
+    ws.onclose = () => {
+       ragSearchBtn.textContent = 'Ask';
+       ragSearchBtn.disabled = false;
+    };
   });
 </script>

@@ -10,8 +10,19 @@ export default defineConfig({
     AstroPWA({
       registerType: 'autoUpdate',
       workbox: {
-        globDirectory: '.vercel/output/static', // Astro cloudflare output varies, usually handled automatically
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+        globDirectory: '.vercel/output/static',
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/huggingface\.co\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'transformers-cache',
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }, // Cache models for 1 year
+              cacheableResponse: { statuses: [0, 200] }
+            }
+          }
+        ]
       },
       manifest: {
         name: 'Mood Relief',
