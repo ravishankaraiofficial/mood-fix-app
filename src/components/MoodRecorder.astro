@@ -264,6 +264,16 @@ import CrisisHandoff from './CrisisHandoff.astro';
       this.querySelector('#response-heading').textContent = `Detected: ${data.emotion}`;
       this.querySelector('#response-content-area').textContent = data.content;
       
+      // Client-Side Voice Synthesis (Sprint 1)
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel(); // Stop any ongoing speech
+        const utterance = new SpeechSynthesisUtterance(data.content);
+        utterance.lang = this.currentLang;
+        utterance.rate = 0.9; // Slightly slower, calming pace
+        utterance.pitch = 0.95; 
+        window.speechSynthesis.speak(utterance);
+      }
+      
       if (data.responseType === 'breathing') {
         this.querySelector('#breathing-circle-container').classList.remove('hidden');
       }

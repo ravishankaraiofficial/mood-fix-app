@@ -1,0 +1,83 @@
+---
+// src/components/CanvasExport.astro
+---
+<div class="mt-8 text-center bg-white p-6 rounded-2xl border border-orange-100 shadow-sm">
+  <h3 class="text-lg font-semibold text-orange-900 mb-2">Wellness Streak Card</h3>
+  <p class="text-sm text-orange-800/80 mb-4">Export a private, anonymous summary of your emotional trends as an image.</p>
+  
+  <button id="export-streak-btn" class="px-6 py-2.5 bg-orange-100 text-orange-800 hover:bg-orange-200 font-medium rounded-full transition-colors text-sm flex items-center justify-center gap-2 mx-auto">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+    </svg>
+    Download Card
+  </button>
+  <canvas id="streak-canvas" width="800" height="400" class="hidden"></canvas>
+</div>
+
+<script>
+  // @ts-nocheck
+  import { getMoodLogs } from '../lib/db';
+
+  document.getElementById('export-streak-btn')?.addEventListener('click', async () => {
+    try {
+      const logs = await getMoodLogs(14);
+      const canvas = document.getElementById('streak-canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Draw Background
+      ctx.fillStyle = '#fff7ed'; // orange-50
+      ctx.fillRect(0, 0, 800, 400);
+
+      // Draw Header
+      ctx.fillStyle = '#ea580c'; // orange-600
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillText('My Wellness Streak', 40, 60);
+
+      ctx.fillStyle = '#9a3412'; // orange-800
+      ctx.font = '20px sans-serif';
+      ctx.fillText('14-Day Anonymous Overview', 40, 95);
+
+      if (logs.length === 0) {
+        ctx.fillStyle = '#9ca3af';
+        ctx.fillText('No data available for this period.', 40, 200);
+      } else {
+        // Draw Simple Bar Chart for Valence
+        const barWidth = 40;
+        const spacing = 15;
+        const maxLogs = Math.min(logs.length, 14);
+        
+        for (let i = 0; i < maxLogs; i++) {
+          const log = logs[i];
+          // Map valence (-1 to 1) to height (20px to 150px)
+          const v = log.valence || 0;
+          const h = 85 + (v * 65); 
+          const x = 40 + (i * (barWidth + spacing));
+          const y = 350 - h;
+          
+          // Color based on valence (green for positive, red for negative, yellow for neutral)
+          if (v > 0.2) ctx.fillStyle = '#4ade80';
+          else if (v < -0.2) ctx.fillStyle = '#f87171';
+          else ctx.fillStyle = '#facc15';
+          
+          ctx.beginPath();
+          ctx.roundRect(x, y, barWidth, h, 8);
+          ctx.fill();
+        }
+        
+        ctx.fillStyle = '#ea580c';
+        ctx.font = '16px sans-serif';
+        ctx.fillText(`${maxLogs} sessions recorded locally`, 40, 380);
+      }
+
+      // Trigger Download
+      const dataUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `Wellness-Streak-${new Date().toISOString().split('T')[0]}.png`;
+      a.click();
+    } catch (e) {
+      console.error('Canvas export failed', e);
+      alert('Failed to generate export card.');
+    }
+  });
+</script>

@@ -7,14 +7,40 @@ import AnalyticsTab from '../components/AnalyticsTab.astro';
 <html lang="en" style="color-scheme: light;">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#fff7ed" />
-    <title>Mood Relief App</title>
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Mood Relief - You are not alone</title>
+    <script is:inline>
+      const h = new Date().getHours();
+      if (h >= 21 || h < 6) {
+        document.documentElement.classList.add('theme-night');
+      }
+    </script>
+    <!-- Offline-First PWA Registration -->
+    <script>
+      // @ts-nocheck
+      import { registerSW } from 'virtual:pwa-register';
+      registerSW({ immediate: true });
+    </script>
+    <style is:global>
+      html.theme-night body {
+        background-color: #120909 !important; /* Charcoal */
+        color: #ffc4b8 !important;
+      }
+      html.theme-night .bg-orange-50 { background-color: #1a0f0f !important; }
+      html.theme-night .bg-orange-100 { background-color: #2a1515 !important; }
+      html.theme-night .text-orange-900 { color: #ffd6cc !important; }
+      html.theme-night .text-orange-800 { color: #ffb8a8 !important; }
+      html.theme-night .border-orange-200 { border-color: #4a2525 !important; }
+      html.theme-night .bg-orange-500 { background-color: #9f1239 !important; /* Crimson */ }
+      html.theme-night .bg-white { background-color: #1a0f0f !important; border-color: #3a1515 !important; }
+      html.theme-night #lang-toast { background-color: #9f1239 !important; color: #fff !important; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&family=Noto+Sans+Bengali&family=Noto+Sans+Devanagari&family=Noto+Sans+Gujarati&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Kannada&family=Noto+Sans+Malayalam&family=Noto+Sans+Oriya&family=Noto+Sans+Tamil&family=Noto+Sans+Telugu&display=swap" rel="stylesheet">
   </head>
-  <body class="min-h-screen flex flex-col items-center justify-center p-6 bg-orange-50 text-ink antialiased pb-20">
+  <body class="min-h-screen flex flex-col items-center justify-center p-6 bg-orange-50 text-ink antialiased pb-20 transition-colors duration-1000">
     <!-- Header with Analytics Toggle -->
     <header class="w-full max-w-[375px] mx-auto flex justify-end mb-4">
       <button id="toggle-analytics-btn" class="p-2 text-orange-900/60 hover:text-orange-900 transition-colors" aria-label="Toggle Analytics">
