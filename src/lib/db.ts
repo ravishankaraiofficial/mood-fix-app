@@ -5,11 +5,15 @@ const STORE_NAME = 'mood_logs';
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    // V3: Bump DB version to 2 to add 'journals' store
+    const request = indexedDB.open(DB_NAME, 2);
     request.onupgradeneeded = (e: any) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains('journals')) {
+        db.createObjectStore('journals', { keyPath: 'id', autoIncrement: true });
       }
     };
     request.onsuccess = (e: any) => resolve(e.target.result);
@@ -72,6 +76,62 @@ export async function getRecentMoodLogs(hours: number = 24) {
     });
   } catch (e) {
     console.warn("DB read failed", e);
+    return [];
+  }
+}
+
+// Journals API
+export async function saveJournal(text: string, tags: string[]) {
+  try {
+    const key = await generateLocalKey();
+    const payload = { text, tags };
+    const { iv, ciphertext } = await encryptData(payload, key);
+    
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('journals', 'readwrite');
+      const store = tx.objectStore('journals');
+      const record = { timestamp: Date.now(), iv, ciphertext };
+      const req = store.add(record);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn("DB save journal failed", e);
+    return false;
+  }
+}
+
+export async function getRecentJournals(hours: number = 24) {
+  try {
+    const key = await generateLocalKey();
+    const db = await openDB();
+    
+    return new Promise<any[]>((resolve, reject) => {
+      const tx = db.transaction('journals', 'readonly');
+      const store = tx.objectStore('journals');
+      const req = store.getAll();
+      
+      req.onsuccess = async (e: any) => {
+        const records = e.target.result;
+        const now = Date.now();
+        const cutoff = now - (hours * 60 * 60 * 1000);
+        
+        const recent = records.filter((r: any) => r.timestamp >= cutoff);
+        
+        const decrypted = [];
+        for (const record of recent) {
+          const data = await decryptData(record.ciphertext, record.iv, key);
+          if (data) {
+            decrypted.push({ timestamp: record.timestamp, data });
+          }
+        }
+        resolve(decrypted);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn("DB read journals failed", e);
     return [];
   }
 }

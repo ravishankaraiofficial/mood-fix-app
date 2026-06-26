@@ -12,6 +12,13 @@ import CrisisHandoff from './CrisisHandoff.astro';
       </svg>
       <span id="bt-status-text">Connect Vitals</span>
     </button>
+    
+    <button id="audio-toggle-btn" class="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-800 hover:bg-orange-200 rounded-full text-xs font-medium transition-colors border border-orange-200 shadow-sm">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+      </svg>
+      <span id="audio-status-text">Soundscape: Off</span>
+    </button>
   </div>
 
   <!-- Language Bar -->
@@ -136,6 +143,7 @@ import CrisisHandoff from './CrisisHandoff.astro';
 <script>
   // @ts-nocheck
   import { saveMoodLog } from '../lib/db';
+  import { toggleSoundscape, updateSoundscape } from '../lib/audioEngine';
   
   const i18n = {
     en: { langName: "English", heading: "Tell me how you’re feeling", status_start: "Tap the microphone to start.", status_recording: "Recording… {time}", status_processing: "Processing…", status_error: "Something went wrong.", response_prefix: "I hear you’re feeling:" },
@@ -149,13 +157,31 @@ import CrisisHandoff from './CrisisHandoff.astro';
       this.btn = this.querySelector('#record-btn');
       this.startOverBtn = this.querySelector('#start-over-btn');
       this.btSyncBtn = this.querySelector('#bt-sync-btn');
+      this.audioToggleBtn = this.querySelector('#audio-toggle-btn');
       this.isRecording = false;
+      this.soundscapePlaying = false;
       this.currentLang = 'en';
       
       this.setupLanguageBar();
       this.btn.addEventListener('click', () => this.toggleRecording());
       this.startOverBtn.addEventListener('click', () => this.resetUI());
       this.btSyncBtn.addEventListener('click', () => this.connectWearable());
+      this.audioToggleBtn.addEventListener('click', () => this.toggleAudio());
+    }
+
+    toggleAudio() {
+      this.soundscapePlaying = !this.soundscapePlaying;
+      toggleSoundscape(this.soundscapePlaying);
+      const txt = this.querySelector('#audio-status-text');
+      if (this.soundscapePlaying) {
+        txt.textContent = 'Soundscape: On';
+        this.audioToggleBtn.classList.replace('bg-orange-100', 'bg-green-100');
+        this.audioToggleBtn.classList.replace('text-orange-800', 'text-green-800');
+      } else {
+        txt.textContent = 'Soundscape: Off';
+        this.audioToggleBtn.classList.replace('bg-green-100', 'bg-orange-100');
+        this.audioToggleBtn.classList.replace('text-green-800', 'text-orange-800');
+      }
     }
 
     setupLanguageBar() {
@@ -195,6 +221,9 @@ import CrisisHandoff from './CrisisHandoff.astro';
           // Target breathe duration formula: Map 60-120 HR to 8-16s cycles
           const targetBreatheDuration = Math.max(8, (heartRate / 60) * 8); 
           document.documentElement.style.setProperty('--breathe-duration', `${targetBreatheDuration}s`);
+          
+          // Interpolate the somatic soundscape based on incoming HR
+          updateSoundscape(heartRate);
         });
       } catch (error) {
         console.warn("Bluetooth permission denied or unavailable", error);

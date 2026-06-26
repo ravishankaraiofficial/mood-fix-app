@@ -3,6 +3,7 @@
 import '../styles/global.css';
 import MoodRecorder from '../components/MoodRecorder.astro';
 import AnalyticsTab from '../components/AnalyticsTab.astro';
+import VoiceJournal from '../components/VoiceJournal.astro';
 ---
 <html lang="en" style="color-scheme: light;">
   <head>
@@ -53,6 +54,7 @@ import AnalyticsTab from '../components/AnalyticsTab.astro';
     <main class="w-full max-w-[375px] mx-auto flex flex-col items-center text-center">
       <MoodRecorder />
       <AnalyticsTab />
+      <VoiceJournal />
     </main>
 
     <footer id="disclaimer-footer" class="fixed bottom-0 left-0 w-full p-4 text-center text-xs text-orange-900/60 bg-orange-50/90 backdrop-blur-sm z-50 border-t border-orange-900/10 transition-all duration-300">
