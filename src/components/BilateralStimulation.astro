@@ -1,0 +1,115 @@
+---
+// src/components/BilateralStimulation.astro
+---
+<div id="bilateral-module" class="w-full max-w-md mx-auto mt-6 p-6 bg-white rounded-2xl shadow-sm border border-indigo-100 hidden">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-semibold text-indigo-900">EMDR Grounding</h3>
+    <button id="close-bilateral" class="text-indigo-400 hover:text-indigo-600">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+  
+  <p class="text-sm text-indigo-800/80 mb-6">Follow the dot with your eyes while listening to the audio. This uses bilateral stimulation to help de-escalate acute stress.</p>
+
+  <div class="relative w-full h-12 bg-indigo-50 border border-indigo-100 rounded-full overflow-hidden mb-6">
+    <div id="bilateral-dot" class="absolute top-1 left-1 w-10 h-10 bg-indigo-500 rounded-full transition-transform duration-[2000ms] ease-in-out"></div>
+  </div>
+
+  <div class="flex justify-center">
+    <button id="start-bilateral" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-medium transition-colors shadow-sm flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      Start Session
+    </button>
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  let ctx = null;
+  let osc = null;
+  let panner = null;
+  let gainNode = null;
+  let interval = null;
+  let isRunning = false;
+
+  const btn = document.getElementById('start-bilateral');
+  const dot = document.getElementById('bilateral-dot');
+  const closeBtn = document.getElementById('close-bilateral');
+  const container = document.getElementById('bilateral-module');
+  
+  // Expose global trigger for Agitation Tracker
+  window.triggerBilateral = () => {
+    container.classList.remove('hidden');
+    container.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  closeBtn?.addEventListener('click', () => {
+    stopSession();
+    container.classList.add('hidden');
+  });
+
+  function stopSession() {
+    if (interval) clearInterval(interval);
+    if (osc) {
+      osc.stop();
+      osc.disconnect();
+    }
+    if (ctx) {
+      ctx.close();
+      ctx = null;
+    }
+    if (dot) dot.style.transform = `translateX(0px)`;
+    isRunning = false;
+    btn.innerHTML = `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> Start Session`;
+  }
+
+  btn?.addEventListener('click', () => {
+    if (isRunning) {
+      stopSession();
+      return;
+    }
+    
+    isRunning = true;
+    btn.innerHTML = `<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h.01M15 10h.01M12 12h.01M12 16h.01" /></svg> Stop Session`;
+    
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    ctx = new AudioContext();
+    
+    // Soft tone
+    osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 220; // A3
+
+    panner = ctx.createStereoPanner();
+    
+    gainNode = ctx.createGain();
+    gainNode.gain.value = 0.1; // Soft volume
+
+    osc.connect(panner);
+    panner.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.start();
+
+    let isRight = false;
+    const trackWidth = dot.parentElement.offsetWidth - dot.offsetWidth - 8; // 8px padding
+
+    const toggle = () => {
+      isRight = !isRight;
+      // Visual
+      if (dot) dot.style.transform = `translateX(${isRight ? trackWidth : 0}px)`;
+      // Audio
+      if (panner) {
+        panner.pan.setValueAtTime(isRight ? 1 : -1, ctx.currentTime);
+      }
+    };
+
+    toggle();
+    interval = setInterval(toggle, 2000); // 2 second sweeps
+  });
+</script>

@@ -165,6 +165,7 @@ import CrisisHandoff from './CrisisHandoff.astro';
   import { saveMoodLog } from '../lib/db';
   import { toggleSoundscape, updateSoundscape } from '../lib/audioEngine';
   import { SympathySyncClient } from '../lib/webrtc';
+  import { startHapticPacing, stopHapticPacing } from '../lib/haptics';
   
   const i18n = {
     en: { langName: "English", heading: "Tell me how you’re feeling", status_start: "Tap the microphone to start.", status_recording: "Recording… {time}", status_processing: "Processing…", status_error: "Something went wrong.", response_prefix: "I hear you’re feeling:" },
@@ -369,6 +370,7 @@ import CrisisHandoff from './CrisisHandoff.astro';
       
       if (data.responseType === 'breathing') {
         this.querySelector('#breathing-circle-container').classList.remove('hidden');
+        startHapticPacing(10000); // Start 10s haptic breathe cycle
       }
       
       if (data.distressFlag) {
@@ -388,6 +390,7 @@ import CrisisHandoff from './CrisisHandoff.astro';
       const crisis = this.querySelector('#crisis-handoff');
       if (crisis) crisis.classList.add('hidden');
       this.querySelector('#status-text').textContent = "Tap the microphone to start.";
+      stopHapticPacing();
     }
   }
 
