@@ -1,3 +1,5 @@
+import { getRecentMeals } from './db';
+
 export async function getEnvironmentalContext() {
   return new Promise((resolve) => {
     if (typeof window === 'undefined' || !navigator.geolocation) {
@@ -25,10 +27,13 @@ export async function getEnvironmentalContext() {
           if (wCode >= 80) condition = "Stormy";
           if (wCode >= 1 && wCode <= 3) condition = "Cloudy";
 
+          const recentMeals = await getRecentMeals(12);
+
           resolve({
             condition,
             temperature: wData.current?.temperature_2m,
-            aqi: aData.current?.us_aqi
+            aqi: aData.current?.us_aqi,
+            recentMeals
           });
         } catch (e) {
           resolve(null);

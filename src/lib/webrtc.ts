@@ -92,7 +92,11 @@ export class SympathySyncClient {
       receiveChannel.onmessage = (e) => {
         try {
           const payload = JSON.parse(e.data);
-          this.onDataCallback(payload);
+          if (payload.type === 'haptic_pulse') {
+             if (navigator.vibrate) navigator.vibrate([100, 50, 100]); // Silent digital squeeze
+          } else {
+             this.onDataCallback(payload);
+          }
         } catch(err) {}
       };
     };
@@ -109,6 +113,10 @@ export class SympathySyncClient {
     if (this.dataChannel && this.dataChannel.readyState === 'open') {
       this.dataChannel.send(JSON.stringify(payload));
     }
+  }
+
+  public sendHapticPulse() {
+    this.sendData({ type: 'haptic_pulse' });
   }
 
   public disconnect() {

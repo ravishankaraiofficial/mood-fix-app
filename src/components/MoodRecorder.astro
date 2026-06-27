@@ -248,9 +248,25 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
           this.partnerCircle.style.opacity = '0.6';
         }
       }, (status) => {
-        if (this.syncStatus) this.syncStatus.textContent = status;
-        if (status === 'WebRTC Connection Lost' || status === 'Peer disconnected.') {
-          if (this.partnerCircle) this.partnerCircle.style.opacity = '0';
+        this.syncStatus.textContent = status;
+        
+        // Expose haptic pulse button if connected
+        if (status === 'Co-Regulation Active' && this.syncClient) {
+           const squeezeBtn = document.createElement('button');
+           squeezeBtn.className = 'w-full py-2 mt-2 bg-orange-100 text-orange-800 text-xs rounded-xl font-bold border border-orange-200 active:bg-orange-300 transition-colors';
+           squeezeBtn.textContent = 'Send Haptic Squeeze';
+           squeezeBtn.onclick = () => {
+             this.syncClient.sendHapticPulse();
+           };
+           // Avoid duplicates
+           const existing = document.getElementById('haptic-squeeze-btn');
+           if (!existing) {
+             squeezeBtn.id = 'haptic-squeeze-btn';
+             this.syncStatus.parentNode.appendChild(squeezeBtn);
+           }
+        } else {
+           const existing = document.getElementById('haptic-squeeze-btn');
+           if (existing) existing.remove();
         }
       });
       

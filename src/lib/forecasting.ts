@@ -1,6 +1,7 @@
 // src/lib/forecasting.ts
+import { connectSmartBulbAndDim } from './smartHome';
 
-export async function trainAndPredictForecast(moodLogs: any[]) {
+export async function trainAndPredictForecast(moodLogs: any[], isShiftWorker: boolean = false) {
   // Dynamically load tfjs to avoid blocking main thread at startup
   const tf = await import('@tensorflow/tfjs');
 
@@ -19,10 +20,18 @@ export async function trainAndPredictForecast(moodLogs: any[]) {
     for (let j = 0; j < windowSize; j++) {
       const log = sorted[i + j].data;
       const date = new Date(sorted[i + j].timestamp);
+      
+      let normHour = date.getHours() / 24;
+      if (isShiftWorker) {
+         // Shift the circadian baseline for irregular hospitality operations (Trident Jaipur 2019-2025)
+         // Prevents misclassifying post-shift exhaustion as depression
+         normHour = (date.getHours() + 12) % 24 / 24;
+      }
+      
       seq.push([
         log.valence || 0,
         log.arousal || 0,
-        date.getHours() / 24, // Normalize hour
+        normHour, // Normalize hour
         date.getDay() / 7     // Normalize day
       ]);
     }
@@ -54,10 +63,14 @@ export async function trainAndPredictForecast(moodLogs: any[]) {
   for (let j = sorted.length - windowSize; j < sorted.length; j++) {
       const log = sorted[j].data;
       const date = new Date(sorted[j].timestamp);
+      
+      let normHour = date.getHours() / 24;
+      if (isShiftWorker) normHour = (date.getHours() + 12) % 24 / 24;
+      
       lastSeq.push([
         log.valence || 0,
         log.arousal || 0,
-        date.getHours() / 24,
+        normHour,
         date.getDay() / 7
       ]);
   }
@@ -68,6 +81,11 @@ export async function trainAndPredictForecast(moodLogs: any[]) {
   
   // Clean up VRAM
   tf.dispose([xs, ys, input, prediction]);
+  
+  if (prob > 0.8) {
+      // Acute anxiety spike predicted, trigger IoT smart home sensory fallback
+      connectSmartBulbAndDim();
+  }
   
   return prob; // Returns 0.0 to 1.0 probability of a stress event
 }
