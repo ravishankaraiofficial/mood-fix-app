@@ -4,6 +4,7 @@ import '../styles/global.css';
 import MoodRecorder from '../components/MoodRecorder.astro';
 import AnalyticsTab from '../components/AnalyticsTab.astro';
 import ForecastingAlert from '../components/ForecastingAlert.astro';
+import PostureVision from '../components/PostureVision.astro';
 import VoiceJournal from '../components/VoiceJournal.astro';
 import PMRSequence from '../components/PMRSequence.astro';
 import BilateralStimulation from '../components/BilateralStimulation.astro';
@@ -89,8 +90,13 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
     <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&family=Noto+Sans+Bengali&family=Noto+Sans+Devanagari&family=Noto+Sans+Gujarati&family=Noto+Sans+Gurmukhi&family=Noto+Sans+Kannada&family=Noto+Sans+Malayalam&family=Noto+Sans+Oriya&family=Noto+Sans+Tamil&family=Noto+Sans+Telugu&display=swap" rel="stylesheet">
   </head>
   <body class="min-h-screen flex flex-col items-center justify-center p-6 bg-orange-50 text-ink antialiased pb-20 transition-colors duration-1000">
-    <!-- Header with Analytics Toggle -->
-    <header class="w-full max-w-[375px] mx-auto flex justify-end mb-4">
+    <!-- Header with Toggles -->
+    <header class="w-full max-w-[375px] mx-auto flex justify-end gap-2 mb-4">
+      <button id="toggle-posture-btn" class="p-2 text-orange-900/60 hover:text-orange-900 transition-colors" aria-label="Toggle Posture Tracking">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </button>
       <button id="toggle-analytics-btn" class="p-2 text-orange-900/60 hover:text-orange-900 transition-colors" aria-label="Toggle Analytics">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -99,6 +105,7 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
     </header>
 
     <main id="dashboard" class="relative z-10 w-full max-w-lg mx-auto pt-8 pb-32 px-4 space-y-4">
+      <PostureVision />
       <MoodRecorder />
       <ForecastingAlert />
       <AnalyticsTab />
@@ -165,6 +172,10 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
         } catch (e) {
           console.error("Failed to load micro-memory greeting", e);
         }
+      });
+      
+      document.getElementById('toggle-posture-btn')?.addEventListener('click', () => {
+         if (window.togglePostureTracking) window.togglePostureTracking();
       });
     </script>
   </body>

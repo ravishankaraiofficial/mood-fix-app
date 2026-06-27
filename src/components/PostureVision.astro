@@ -1,0 +1,114 @@
+---
+// src/components/PostureVision.astro
+---
+<div id="posture-vision-container">
+   <!-- Hidden video element for local stream processing -->
+   <video id="posture-video" playsinline webkit-playsinline class="hidden"></video>
+   <!-- UI overlay to indicate tracking -->
+   <div id="posture-indicator" class="fixed top-4 left-4 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md text-xs font-bold text-orange-900 flex items-center gap-2 z-50 animate-pulse hidden">
+      <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h2v2h-2v-2zm0-10h2v8h-2V7z"/></svg>
+      Posture Sensing Active
+   </div>
+</div>
+
+<script>
+  // @ts-nocheck
+  let detector = null;
+  let video = null;
+  let trackingId = null;
+  let slouchedStartTime = null;
+  let isTracking = false;
+
+  window.togglePostureTracking = async () => {
+    const indicator = document.getElementById('posture-indicator');
+    
+    if (isTracking) {
+       // Turn off
+       isTracking = false;
+       indicator.classList.add('hidden');
+       if (trackingId) cancelAnimationFrame(trackingId);
+       if (video && video.srcObject) {
+         video.srcObject.getTracks().forEach(t => t.stop());
+         video.srcObject = null;
+       }
+       return;
+    }
+
+    // Turn on
+    isTracking = true;
+    indicator.classList.remove('hidden');
+    video = document.getElementById('posture-video');
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+      await new Promise(resolve => {
+        video.onloadedmetadata = () => {
+          video.play();
+          resolve();
+        };
+      });
+
+      // Lazy load tfjs and pose-detection
+      const tf = await import('@tensorflow/tfjs');
+      const poseDetection = await import('@tensorflow-models/pose-detection');
+      await tf.ready();
+
+      const model = poseDetection.SupportedModels.MoveNet;
+      detector = await poseDetection.createDetector(model, {
+         modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+      });
+      
+      trackPosture();
+    } catch(err) {
+      console.warn("Posture tracking failed to init", err);
+      isTracking = false;
+      indicator.classList.add('hidden');
+    }
+  };
+
+  async function trackPosture() {
+    if (!isTracking || !detector) return;
+    
+    const poses = await detector.estimatePoses(video);
+    if (poses.length > 0) {
+       const keypoints = poses[0].keypoints;
+       const lEar = keypoints.find(k => k.name === 'left_ear');
+       const lShoulder = keypoints.find(k => k.name === 'left_shoulder');
+       
+       if (lEar?.score > 0.3 && lShoulder?.score > 0.3) {
+          // Heuristic: vertical distance between ear and shoulder
+          const neckDist = Math.abs(lEar.y - lShoulder.y);
+          const normalizedDist = neckDist / video.videoHeight;
+          
+          if (normalizedDist < 0.15) { // Threshold for slouching (ear dropping close to shoulder height)
+             if (!slouchedStartTime) slouchedStartTime = Date.now();
+             else {
+               const slouchedDuration = (Date.now() - slouchedStartTime) / 1000 / 60; // in minutes
+               // V5.0 rule: >40 minutes of slouching triggers reset
+               if (slouchedDuration >= 40) {
+                 triggerErgonomicReset();
+                 slouchedStartTime = null; // Reset
+               }
+             }
+          } else {
+             slouchedStartTime = null; // Posture is good, reset timer
+          }
+       }
+    }
+    
+    trackingId = requestAnimationFrame(trackPosture);
+  }
+  
+  function triggerErgonomicReset() {
+     const recorder = document.querySelector('mood-recorder');
+     if (recorder && recorder.renderResponse) {
+        recorder.renderResponse({
+           valence: 0, arousal: 0, emotion: "exhausted",
+           responseType: "ergonomic",
+           content: "I noticed you've been leaning forward for quite a while. Let's do a quick physical reset to relieve that tension.",
+           distressFlag: false
+        });
+     }
+  }
+</script>
