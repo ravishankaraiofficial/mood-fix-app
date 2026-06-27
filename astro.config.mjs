@@ -14,11 +14,11 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/huggingface\.co\/.*/i,
+            urlPattern: /^https:\/\/(huggingface\.co|tfhub\.dev|storage\.googleapis\.com)\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'transformers-cache',
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 }, // Cache models for 1 year
+              cacheName: 'ml-models-cache',
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 365 }, // Cache models for 1 year
               cacheableResponse: { statuses: [0, 200] }
             }
           }

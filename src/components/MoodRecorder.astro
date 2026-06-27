@@ -378,7 +378,14 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
           }
         };
       } catch (err) {
-        console.error(err);
+        console.warn("Microphone access denied", err);
+        const toast = document.getElementById('lang-toast');
+        const toastText = document.getElementById('lang-toast-text');
+        if (toast && toastText) {
+           toastText.textContent = 'Microphone access is required for voice journaling';
+           toast.classList.add('show');
+           setTimeout(() => toast.classList.remove('show'), 3000);
+        }
       }
     }
 

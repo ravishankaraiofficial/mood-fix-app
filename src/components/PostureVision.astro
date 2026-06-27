@@ -64,6 +64,14 @@
       console.warn("Posture tracking failed to init", err);
       isTracking = false;
       indicator.classList.add('hidden');
+      
+      const toast = document.getElementById('lang-toast');
+      const toastText = document.getElementById('lang-toast-text');
+      if (toast && toastText) {
+         toastText.textContent = 'Camera access needed for posture tracking';
+         toast.classList.add('show');
+         setTimeout(() => toast.classList.remove('show'), 3000);
+      }
     }
   };
 

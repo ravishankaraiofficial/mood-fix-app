@@ -1,15 +1,15 @@
 ---
 // src/components/VocalCooldown.astro
 ---
-<div id="vocal-cooldown-ui" class="hidden absolute inset-0 z-50 bg-orange-50/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-fade-in rounded-3xl">
-  <div class="w-16 h-16 mb-4 rounded-full bg-blue-100 flex items-center justify-center shadow-inner">
-    <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+<div id="vocal-cooldown-ui" class="hidden absolute inset-0 z-[70] bg-orange-50/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-fade-in rounded-3xl">
+  <div class="w-16 h-16 mb-4 rounded-full bg-orange-100 flex items-center justify-center shadow-inner">
+    <svg class="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
   </div>
   <h3 class="text-xl font-bold text-orange-900 mb-2">Vocal Strain Detected</h3>
   <p class="text-sm text-orange-800 mb-6 max-w-[250px]">Your voice shows signs of fatigue or vocal fry. Let's do a quiet, 60-second jaw release and hum.</p>
   
-  <div id="vocal-anim" class="w-32 h-32 border-4 border-blue-400 rounded-full flex items-center justify-center mb-10 transition-transform duration-1000 ease-in-out shadow-lg">
-     <span id="vocal-text" class="text-blue-800 font-bold text-sm tracking-widest uppercase">Drop Jaw</span>
+  <div id="vocal-anim" class="w-32 h-32 border-4 border-orange-400 rounded-full flex items-center justify-center mb-10 transition-transform duration-1000 ease-in-out shadow-lg">
+     <span id="vocal-text" class="text-orange-900 font-bold text-sm tracking-widest uppercase">Drop Jaw</span>
   </div>
 
   <button id="close-vocal-cooldown" class="px-6 py-3 bg-orange-200 text-orange-900 font-bold rounded-xl hover:bg-orange-300 shadow-sm active:scale-95 transition-transform">End Cooldown</button>
