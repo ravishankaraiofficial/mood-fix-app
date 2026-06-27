@@ -8,6 +8,11 @@ import PostureVision from '../components/PostureVision.astro';
 import VoiceJournal from '../components/VoiceJournal.astro';
 import PMRSequence from '../components/PMRSequence.astro';
 import BilateralStimulation from '../components/BilateralStimulation.astro';
+import ErgonomicReset from '../components/ErgonomicReset.astro';
+import ImmersiveRoom from '../components/ImmersiveRoom.astro';
+import VocalCooldown from '../components/VocalCooldown.astro';
+import TransitGrounding from '../components/TransitGrounding.astro';
+import TradingFloorReset from '../components/TradingFloorReset.astro';
 ---
 <html lang="en" style="color-scheme: light;">
   <head>
@@ -112,6 +117,11 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
       <VoiceJournal />
       <PMRSequence />
       <BilateralStimulation />
+      <ErgonomicReset />
+      <ImmersiveRoom />
+      <VocalCooldown />
+      <TransitGrounding />
+      <TradingFloorReset />
     </main>
 
     <footer id="disclaimer-footer" class="fixed bottom-0 left-0 w-full p-4 text-center text-xs text-orange-900/60 bg-orange-50/90 backdrop-blur-sm z-50 border-t border-orange-900/10 transition-all duration-300">
@@ -124,22 +134,25 @@ import BilateralStimulation from '../components/BilateralStimulation.astro';
       import { startAgitationTracker } from '../lib/agitationTracker';
 
       startAgitationTracker(() => {
-        const toast = document.getElementById('lang-toast');
-        const text = document.getElementById('lang-toast-text');
-        if (toast && text) {
-          text.innerHTML = `<strong>High physical agitation detected.</strong><br/>Tap here to try a grounding exercise.`;
-          toast.classList.add('show');
-          toast.classList.remove('pointer-events-none');
-          toast.style.cursor = 'pointer';
-          toast.onclick = () => {
-            if (window.triggerBilateral) window.triggerBilateral();
-            toast.classList.remove('show');
-            toast.classList.add('pointer-events-none');
-          };
-          setTimeout(() => {
-             toast.classList.remove('show');
-             toast.classList.add('pointer-events-none');
-          }, 8000);
+        const recorder = document.querySelector('mood-recorder');
+        if (recorder && recorder.renderResponse) {
+          recorder.renderResponse({
+            valence: -0.5, arousal: 0.8, emotion: "agitated",
+            responseType: "breathing",
+            content: "I'm detecting some physical restlessness. Let's take a slow breath together.",
+            distressFlag: false
+          });
+        }
+      }, () => {
+        // Transit detection heuristic triggered
+        const recorder = document.querySelector('mood-recorder');
+        if (recorder && recorder.renderResponse) {
+          recorder.renderResponse({
+            valence: -0.2, arousal: 0.6, emotion: "transit_overload",
+            responseType: "transit_grounding",
+            content: "It looks like you're in transit. Activating sensory grounding.",
+            distressFlag: false
+          });
         }
       });
 

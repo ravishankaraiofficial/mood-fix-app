@@ -1,0 +1,76 @@
+---
+// src/components/TradingFloorReset.astro
+---
+<div id="trading-floor-reset-ui" class="hidden fixed bottom-4 right-4 z-[60] w-72 bg-slate-900 border border-slate-700 shadow-[0_10px_40px_rgba(0,0,0,0.5)] rounded-2xl p-4 animate-slide-up">
+  <div class="flex justify-between items-center mb-3">
+    <h3 class="text-xs font-black text-slate-100 uppercase tracking-widest flex items-center gap-2">
+      <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div> Tactical Reset
+    </h3>
+    <button id="close-trading-reset" class="text-slate-400 hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    </button>
+  </div>
+  
+  <p class="text-[11px] text-slate-400 mb-4 leading-relaxed font-medium">Keep eyes open. Match the cadence to lower cortisol without breaking workflow.</p>
+  
+  <div class="relative w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mb-3 shadow-inner">
+    <div id="trading-bar" class="absolute left-0 top-0 h-full bg-indigo-500 w-0 transition-all duration-300 ease-linear shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+  </div>
+  <div id="trading-instruction" class="text-center text-sm font-black text-indigo-400 uppercase tracking-[0.2em]">Inhale</div>
+</div>
+
+<script>
+  // @ts-nocheck
+  let tradingPhase = 0; // 0: in, 1: hold, 2: out, 3: hold
+  let tradingInterval = null;
+  let cycleCount = 0;
+  
+  window.triggerTradingReset = () => {
+    const ui = document.getElementById('trading-floor-reset-ui');
+    if (!ui.classList.contains('hidden')) return;
+    
+    const bar = document.getElementById('trading-bar');
+    const text = document.getElementById('trading-instruction');
+    ui.classList.remove('hidden');
+    
+    tradingPhase = 0;
+    cycleCount = 0;
+    
+    // Rapid cadence initially (3s per phase) slowing down to 4s
+    const runCycle = () => {
+       const duration = cycleCount > 2 ? 4000 : 3000;
+       
+       bar.style.transitionDuration = `${duration}ms`;
+       
+       if (tradingPhase === 0) {
+          text.textContent = 'Inhale';
+          bar.style.width = '100%';
+       } else if (tradingPhase === 1) {
+          text.textContent = 'Hold';
+       } else if (tradingPhase === 2) {
+          text.textContent = 'Exhale';
+          bar.style.width = '0%';
+       } else if (tradingPhase === 3) {
+          text.textContent = 'Hold';
+          cycleCount++;
+       }
+       
+       tradingPhase = (tradingPhase + 1) % 4;
+       
+       if (cycleCount > 5) { // Stop automatically after ~1.5 minutes
+          document.getElementById('close-trading-reset')?.click();
+          return;
+       }
+       
+       tradingInterval = setTimeout(runCycle, duration);
+    };
+    
+    // Start slightly delayed to allow transition reset
+    setTimeout(runCycle, 100);
+  };
+
+  document.getElementById('close-trading-reset')?.addEventListener('click', () => {
+    document.getElementById('trading-floor-reset-ui').classList.add('hidden');
+    if (tradingInterval) clearTimeout(tradingInterval);
+  });
+</script>

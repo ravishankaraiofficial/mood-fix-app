@@ -164,16 +164,42 @@
     
     gl.uniform1f(uTimeLoc, time * 0.001);
     gl.uniform1f(uVolLoc, volume);
-    gl.uniform1f(uPitchLoc, pitch);
-    gl.uniform2f(uResLoc, gl.canvas.width, gl.canvas.height);
+    // Send float buffer directly to WebGL
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, analyser.frequencyBinCount, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, dataArray);
     
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    // Vocal strain detection heuristic:
+    // If pitch variance is very low over a continuous high volume period (vocal fry / monotone burnout)
+    if (window.isRecordingSession) {
+       if (!window.pitchHistory) window.pitchHistory = [];
+       if (volume > 0.05) window.pitchHistory.push(pitch);
+       
+       if (window.pitchHistory.length > 300) { // ~10 seconds at 30fps
+          const avgPitch = window.pitchHistory.reduce((a,b)=>a+b,0)/300;
+          let variance = 0;
+          window.pitchHistory.forEach(p => variance += (p-avgPitch)*(p-avgPitch));
+          variance /= 300;
+          
+          if (variance < 0.005) { // Very monotone / vocal fry detected
+             if (window.triggerVocalCooldown) {
+                window.triggerVocalCooldown();
+                window.pitchHistory = []; // reset
+             }
+          }
+          window.pitchHistory.shift();
+       }
+    }
+
+    // Draw
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     
     animationFrameId = requestAnimationFrame(render);
   }
 
   window.startVoiceFluid = (audioStream) => {
     if (!gl) return;
+    window.isRecordingSession = true;
+    window.pitchHistory = [];
+    
     canvas.classList.remove('opacity-0');
     canvas.classList.add('opacity-100');
     document.getElementById('fluid-export-container').classList.remove('opacity-0', 'pointer-events-none');
@@ -194,6 +220,7 @@
   };
 
   window.stopVoiceFluid = () => {
+    window.isRecordingSession = false;
     canvas.classList.remove('opacity-100');
     canvas.classList.add('opacity-0');
     document.getElementById('fluid-export-container').classList.add('opacity-0', 'pointer-events-none');

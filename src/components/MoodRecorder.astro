@@ -384,9 +384,15 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
     renderResponse(data) {
       this.querySelector('#record-view').classList.add('hidden');
       
-      if (data.responseType === 'ergonomic_reset') {
-         if (window.startErgonomicReset) window.startErgonomicReset(this.currentLang);
-         return; // Skip standard response rendering
+      // Ergonomic Reset UI injection
+      if (data.responseType === 'ergonomic_reset' || data.content.includes('[ACTION: ERGONOMIC_RESET]')) {
+         window.triggerErgonomicReset();
+      } else if (data.responseType === 'trading_reset' || data.content.includes('[ACTION: TRADING_RESET]')) {
+         if (window.triggerTradingReset) window.triggerTradingReset();
+      } else if (data.responseType === 'vocal_cooldown' || data.content.includes('[ACTION: VOCAL_COOLDOWN]')) {
+         if (window.triggerVocalCooldown) window.triggerVocalCooldown();
+      } else if (data.responseType === 'transit_grounding' || data.content.includes('[ACTION: TRANSIT_GROUNDING]')) {
+         if (window.triggerTransitGrounding) window.triggerTransitGrounding();
       }
       
       if (data.responseType === 'immersive_room') {

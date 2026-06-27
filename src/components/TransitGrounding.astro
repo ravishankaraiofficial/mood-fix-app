@@ -1,0 +1,79 @@
+---
+// src/components/TransitGrounding.astro
+---
+<div id="transit-grounding-ui" class="hidden absolute inset-0 z-50 bg-zinc-900/95 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center animate-fade-in rounded-3xl">
+  <div class="w-16 h-16 mb-4 rounded-full bg-zinc-800 flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-zinc-700">
+    <svg class="w-8 h-8 text-zinc-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+  </div>
+  <h3 class="text-xl font-bold text-zinc-100 mb-2 tracking-wide">Transit Overload</h3>
+  <p class="text-sm text-zinc-400 mb-10 max-w-[260px] leading-relaxed">Counter-rhythmic pacing and 432Hz binaural beats initiated to anchor your nervous system.</p>
+  
+  <div class="relative w-32 h-32 mb-10">
+     <div class="absolute inset-0 bg-zinc-700 rounded-full opacity-30 animate-ping" style="animation-duration: 3s;"></div>
+     <div class="absolute inset-2 bg-zinc-700 rounded-full opacity-50 animate-ping" style="animation-duration: 3s; animation-delay: 1.5s;"></div>
+     <div class="absolute inset-6 bg-zinc-800 rounded-full flex items-center justify-center shadow-inner border border-zinc-600">
+       <span class="text-zinc-300 font-bold tracking-widest text-xs uppercase opacity-80">Grounding</span>
+     </div>
+  </div>
+
+  <button id="close-transit-grounding" class="px-8 py-3 bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold rounded-xl hover:bg-zinc-700 shadow-lg active:scale-95 transition-transform uppercase tracking-wider text-xs">Disable</button>
+</div>
+
+<script>
+  // @ts-nocheck
+  let transitOscillators = [];
+  let transitHapticInterval = null;
+
+  window.triggerTransitGrounding = () => {
+    const ui = document.getElementById('transit-grounding-ui');
+    if (!ui.classList.contains('hidden')) return;
+    ui.classList.remove('hidden');
+    
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+      
+      const leftOsc = ctx.createOscillator();
+      const rightOsc = ctx.createOscillator();
+      const leftPan = ctx.createStereoPanner();
+      const rightPan = ctx.createStereoPanner();
+      
+      leftOsc.type = 'sine';
+      rightOsc.type = 'sine';
+      leftOsc.frequency.setValueAtTime(432.0, ctx.currentTime);
+      rightOsc.frequency.setValueAtTime(436.0, ctx.currentTime); // 4Hz Theta beat
+      
+      leftPan.pan.value = -1;
+      rightPan.pan.value = 1;
+      
+      leftOsc.connect(leftPan).connect(ctx.destination);
+      rightOsc.connect(rightPan).connect(ctx.destination);
+      
+      leftOsc.start();
+      rightOsc.start();
+      transitOscillators = [leftOsc, rightOsc, ctx];
+    } catch(e) {
+      console.warn("Binaural beat failed to start", e);
+    }
+    
+    if (navigator.vibrate) {
+       transitHapticInterval = setInterval(() => {
+          navigator.vibrate([300, 2000, 300]);
+       }, 4000);
+    }
+  };
+
+  document.getElementById('close-transit-grounding')?.addEventListener('click', () => {
+    document.getElementById('transit-grounding-ui').classList.add('hidden');
+    if (transitOscillators.length > 0) {
+      transitOscillators[0].stop();
+      transitOscillators[1].stop();
+      if(transitOscillators[2].state !== 'closed') transitOscillators[2].close();
+      transitOscillators = [];
+    }
+    if (transitHapticInterval) {
+       clearInterval(transitHapticInterval);
+       if(navigator.vibrate) navigator.vibrate(0);
+    }
+  });
+</script>
