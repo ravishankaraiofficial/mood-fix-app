@@ -84,6 +84,8 @@
     });
   }
 
+  let persistentFinalTranscript = '';
+
   // Graceful degradation for Speech Recognition
   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -91,8 +93,24 @@
     recognition.continuous = true;
     recognition.interimResults = true;
     
+    function resetMicUI() {
+      micText.textContent = 'Start Dictation';
+      if (micBtn.classList.contains('bg-red-100')) {
+        micBtn.classList.replace('bg-red-100', 'bg-orange-100');
+        micBtn.classList.replace('text-red-800', 'text-orange-800');
+      }
+      if (statusDot.classList.contains('bg-red-500')) {
+        statusDot.classList.replace('bg-red-500', 'bg-gray-300');
+      }
+      statusDot.classList.remove('animate-pulse');
+    }
+    
     recognition.onstart = () => {
       isRecording = true;
+      persistentFinalTranscript = textArea.value; 
+      if (persistentFinalTranscript && !persistentFinalTranscript.endsWith(' ')) {
+         persistentFinalTranscript += ' ';
+      }
       micText.textContent = 'Stop Dictation';
       micBtn.classList.replace('bg-orange-100', 'bg-red-100');
       micBtn.classList.replace('text-orange-800', 'text-red-800');
@@ -101,27 +119,31 @@
     };
 
     recognition.onresult = (event) => {
-      let finalTranscript = '';
+      let interimTranscript = '';
+      let newlyFinal = '';
+      
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
+          newlyFinal += event.results[i][0].transcript + ' ';
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
-      if (finalTranscript) {
-        textArea.value += finalTranscript;
-        extractTags(textArea.value);
-      }
+      
+      persistentFinalTranscript += newlyFinal;
+      textArea.value = persistentFinalTranscript + interimTranscript;
+      extractTags(textArea.value);
     };
 
-    recognition.onerror = (e) => console.warn('Speech recognition error', e);
+    recognition.onerror = (e) => {
+      console.warn('Speech recognition error', e);
+      isRecording = false;
+      resetMicUI();
+    };
     
     recognition.onend = () => {
       isRecording = false;
-      micText.textContent = 'Start Dictation';
-      micBtn.classList.replace('bg-red-100', 'bg-orange-100');
-      micBtn.classList.replace('text-red-800', 'text-orange-800');
-      statusDot.classList.replace('bg-red-500', 'bg-gray-300');
-      statusDot.classList.remove('animate-pulse');
+      resetMicUI();
       extractTags(textArea.value); // Final sweep
     };
 
@@ -129,11 +151,20 @@
       if (isRecording) {
         recognition.stop();
       } else {
+        try {
+          recognition.abort(); // Cleanup previous if stuck
+        } catch(e) {}
+        
         const lang = localStorage.getItem('moodReliefLang') || 'en';
-        // Map simple codes to specific locales (e.g., 'en' -> 'en-US', 'hi' -> 'hi-IN')
+        // Map simple codes to specific locales
         const locales = { en: 'en-US', hi: 'hi-IN', bn: 'bn-IN', ta: 'ta-IN' }; 
         recognition.lang = locales[lang] || lang;
-        recognition.start();
+        
+        try {
+          recognition.start();
+        } catch(e) {
+          console.warn("Could not start recognition:", e);
+        }
       }
     });
   } else {
