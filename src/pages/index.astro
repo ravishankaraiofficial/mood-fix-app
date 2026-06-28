@@ -152,17 +152,6 @@ import DarkModeToggle from '../components/DarkModeToggle.astro';
             distressFlag: false
           });
         }
-      }, () => {
-        // Transit detection heuristic triggered
-        const recorder = document.querySelector('mood-recorder');
-        if (recorder && recorder.renderResponse) {
-          recorder.renderResponse({
-            valence: -0.2, arousal: 0.6, emotion: "transit_overload",
-            responseType: "transit_grounding",
-            content: "It looks like you're in transit. Activating sensory grounding.",
-            distressFlag: false
-          });
-        }
       });
 
 

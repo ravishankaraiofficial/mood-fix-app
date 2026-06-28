@@ -35,7 +35,9 @@ export function startAgitationTracker(onAgitationDetected: () => void, onTransit
        if (avg > THRESHOLD) {
          lastTrigger = now;
          onAgitationDetected();
-       } else if (zHistory.length === HISTORY_SIZE * 2 && onTransitDetected) {
+       } 
+       /* 
+       else if (zHistory.length === HISTORY_SIZE * 2 && onTransitDetected) {
          // Transit check: continuous low variance rumbling
          const avgZ = zHistory.reduce((a, b) => a + b, 0) / zHistory.length;
          let varianceZ = 0;
@@ -48,6 +50,7 @@ export function startAgitationTracker(onAgitationDetected: () => void, onTransit
             onTransitDetected();
          }
        }
+       */
     }
   };
 
