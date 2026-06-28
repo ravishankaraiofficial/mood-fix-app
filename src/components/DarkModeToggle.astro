@@ -25,11 +25,14 @@
           themeToggleLightIcon.classList.toggle('hidden');
 
           if (document.documentElement.classList.contains('dark')) {
-              document.documentElement.classList.remove('dark');
+              document.documentElement.classList.remove('dark', 'theme-night', 'theme-deep-ocean', 'theme-midnight-forest', 'theme-desert-dawn');
               localStorage.setItem('theme', 'light');
+              localStorage.setItem('moodReliefTheme', 'default');
           } else {
+              document.documentElement.classList.remove('theme-night', 'theme-deep-ocean', 'theme-midnight-forest', 'theme-desert-dawn');
               document.documentElement.classList.add('dark');
               localStorage.setItem('theme', 'dark');
+              localStorage.setItem('moodReliefTheme', 'default');
           }
       });
   }
