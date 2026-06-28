@@ -5,8 +5,8 @@
 <div id="voice-journal" class="w-full max-w-md mx-auto mt-8 bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
   <div class="flex justify-between items-start mb-4">
     <div>
-      <h3 class="text-xl font-semibold text-orange-900">Reflection Journal</h3>
-      <p class="text-sm text-orange-800/70">Speak freely. Locally encrypted with smart tags.</p>
+      <h3 class="text-xl font-semibold text-orange-900" data-i18n-key="reflection_title">Reflection Journal</h3>
+      <p class="text-sm text-orange-800/70" data-i18n-key="reflection_desc">Speak freely. Locally encrypted with smart tags.</p>
     </div>
     <div id="journal-status" class="w-3 h-3 rounded-full bg-gray-300"></div>
   </div>
@@ -24,15 +24,15 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
       </svg>
-      <span id="vj-mic-text">Start Dictation</span>
+      <span id="vj-mic-text" data-i18n-key="dictation_start">Start Dictation</span>
     </button>
-    <button id="vj-save-btn" class="flex-1 py-3 bg-orange-600 text-white font-medium rounded-xl hover:bg-orange-700 transition-colors">
+    <button id="vj-save-btn" data-i18n-key="save_encrypted" class="flex-1 py-3 bg-orange-600 text-white font-medium rounded-xl hover:bg-orange-700 transition-colors">
       Save Encrypted
     </button>
   </div>
 
   <div class="mt-8 border-t border-orange-100 pt-6">
-    <h4 class="text-lg font-semibold text-orange-900 mb-2">Chat with your past self</h4>
+    <h4 class="text-lg font-semibold text-orange-900 mb-2" data-i18n-key="chat_past">Chat with your past self</h4>
     <div class="flex gap-2">
        <input id="rag-query" type="text" class="flex-1 p-3 border border-orange-200 rounded-xl bg-orange-50/50 text-orange-900 placeholder:text-orange-900/40 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-shadow text-sm" placeholder="e.g. How did I handle stress last month?">
        <button id="rag-search-btn" class="px-5 py-3 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm active:scale-95">Ask</button>
@@ -44,6 +44,7 @@
 <script>
   // @ts-nocheck
   import { saveJournal } from '../lib/db';
+  import { translations } from '../lib/i18n';
 
   const micBtn = document.getElementById('vj-mic-btn');
   const micText = document.getElementById('vj-mic-text');
@@ -94,7 +95,8 @@
     recognition.interimResults = true;
     
     function resetMicUI() {
-      micText.textContent = 'Start Dictation';
+      const langDict = translations[localStorage.getItem('moodReliefLang') || 'en'] || translations['en'];
+      micText.textContent = langDict.dictation_start || 'Start Dictation';
       if (micBtn.classList.contains('bg-red-100')) {
         micBtn.classList.replace('bg-red-100', 'bg-orange-100');
         micBtn.classList.replace('text-red-800', 'text-orange-800');
@@ -111,7 +113,8 @@
       if (persistentFinalTranscript && !persistentFinalTranscript.endsWith(' ')) {
          persistentFinalTranscript += ' ';
       }
-      micText.textContent = 'Stop Dictation';
+      const langDict = translations[localStorage.getItem('moodReliefLang') || 'en'] || translations['en'];
+      micText.textContent = langDict.dictation_stop || 'Stop Dictation';
       micBtn.classList.replace('bg-orange-100', 'bg-red-100');
       micBtn.classList.replace('text-orange-800', 'text-red-800');
       statusDot.classList.replace('bg-gray-300', 'bg-red-500');

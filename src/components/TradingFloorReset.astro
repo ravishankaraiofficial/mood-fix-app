@@ -4,23 +4,25 @@
 <div id="trading-floor-reset-ui" class="hidden fixed bottom-4 left-4 z-[60] w-72 bg-white dark:bg-gray-800 border border-orange-200 dark:border-gray-700 shadow-[0_10px_40px_rgba(0,0,0,0.15)] rounded-2xl p-4 animate-slide-up">
   <div class="flex justify-between items-center mb-3">
     <h3 class="text-xs font-black text-orange-900 dark:text-gray-100 uppercase tracking-widest flex items-center gap-2">
-      <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div> Tactical Reset
+      <div class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></div> <span data-i18n-key="tactical_reset">Tactical Reset</span>
     </h3>
     <button id="close-trading-reset" class="text-orange-400 dark:text-gray-400 hover:text-orange-600 dark:hover:text-gray-200 transition-colors">
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
     </button>
   </div>
   
-  <p class="text-[11px] text-orange-800 dark:text-gray-300 mb-4 leading-relaxed font-medium">Keep eyes open. Match the cadence to lower cortisol without breaking workflow.</p>
+  <p class="text-[11px] text-orange-800 dark:text-gray-300 mb-4 leading-relaxed font-medium" data-i18n-key="reset_instruction">Keep eyes open. Match the cadence to lower cortisol without breaking workflow.</p>
   
   <div class="relative w-full h-2.5 bg-orange-100 dark:bg-gray-700 rounded-full overflow-hidden mb-3 shadow-inner">
     <div id="trading-bar" class="absolute left-0 top-0 h-full bg-orange-500 w-0 transition-all duration-300 ease-linear shadow-[0_0_10px_rgba(249,115,22,0.5)]"></div>
   </div>
-  <div id="trading-instruction" class="text-center text-sm font-black text-orange-600 dark:text-orange-400 uppercase tracking-[0.2em]">Inhale</div>
+  <div id="trading-instruction" class="text-center text-sm font-black text-orange-600 dark:text-orange-400 uppercase tracking-[0.2em]" data-i18n-key="breathe_inhale">Inhale</div>
 </div>
 
 <script>
   // @ts-nocheck
+  import { translations } from '../lib/i18n';
+  
   let tradingPhase = 0; // 0: in, 1: hold, 2: out, 3: hold
   let tradingInterval = null;
   let cycleCount = 0;
@@ -39,19 +41,20 @@
     // Rapid cadence initially (3s per phase) slowing down to 4s
     const runCycle = () => {
        const duration = cycleCount > 2 ? 4000 : 3000;
+       const langDict = translations[localStorage.getItem('moodReliefLang') || 'en'] || translations['en'];
        
        bar.style.transitionDuration = `${duration}ms`;
        
        if (tradingPhase === 0) {
-          text.textContent = 'Inhale';
+          text.textContent = langDict.breathe_inhale || 'Inhale';
           bar.style.width = '100%';
        } else if (tradingPhase === 1) {
-          text.textContent = 'Hold';
+          text.textContent = langDict.breathe_hold || 'Hold';
        } else if (tradingPhase === 2) {
-          text.textContent = 'Exhale';
+          text.textContent = langDict.breathe_exhale || 'Exhale';
           bar.style.width = '0%';
        } else if (tradingPhase === 3) {
-          text.textContent = 'Hold';
+          text.textContent = langDict.breathe_hold || 'Hold';
           cycleCount++;
        }
        

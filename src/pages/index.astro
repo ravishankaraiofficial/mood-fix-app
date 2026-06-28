@@ -140,20 +140,6 @@ import DarkModeToggle from '../components/DarkModeToggle.astro';
     <script>
       // @ts-nocheck
       import { getRecentMoodLogs } from '../lib/db';
-      import { startAgitationTracker } from '../lib/agitationTracker';
-
-      startAgitationTracker(() => {
-        const recorder = document.querySelector('mood-recorder');
-        if (recorder && recorder.renderResponse) {
-          recorder.renderResponse({
-            valence: -0.5, arousal: 0.8, emotion: "agitated",
-            responseType: "breathing",
-            content: "I'm detecting some physical restlessness. Let's take a slow breath together.",
-            distressFlag: false
-          });
-        }
-      });
-
 
       // Toggle Analytics
       const toggleBtn = document.getElementById('toggle-analytics-btn');

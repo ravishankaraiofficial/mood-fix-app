@@ -13,7 +13,7 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
     <!-- Sympathy Sync WebRTC UI -->
     <div id="sympathy-sync-ui" class="flex gap-2 items-center">
       <input type="text" id="sync-room-code" placeholder="Code" class="w-16 px-2 py-1.5 border border-indigo-200 rounded text-center text-xs focus:outline-none focus:ring-1 focus:ring-indigo-400 bg-white">
-      <button id="sync-connect-btn" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full text-xs font-medium transition-colors border border-indigo-100 shadow-sm">
+      <button id="sync-connect-btn" data-i18n-key="coregulate" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full text-xs font-medium transition-colors border border-indigo-100 shadow-sm">
         Co-Regulate
       </button>
       <span id="sync-status-text" class="text-[10px] text-indigo-800 hidden md:inline"></span>
@@ -23,14 +23,14 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
-      <span id="bt-status-text">Connect Vitals</span>
+      <span id="bt-status-text" data-i18n-key="connect_vitals">Connect Vitals</span>
     </button>
     
     <button id="audio-toggle-btn" class="flex items-center gap-1 px-3 py-1.5 bg-orange-100 text-orange-800 hover:bg-orange-200 rounded-full text-xs font-medium transition-colors border border-orange-200 shadow-sm">
       <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
       </svg>
-      <span id="audio-status-text">Soundscape: Off</span>
+      <span id="audio-status-text" data-i18n-key="soundscape_off">Soundscape: Off</span>
     </button>
   </div>
 
@@ -67,16 +67,16 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
 
   <!-- Record View -->
   <div id="record-view" class="w-full flex flex-col items-center">
-    <h1 id="ui-heading" class="text-3xl font-semibold tracking-tight mb-2 text-orange-900 transition-all duration-300">
+    <h1 id="ui-heading" data-i18n-key="heading" class="text-3xl font-semibold tracking-tight mb-2 text-orange-900 transition-all duration-300">
       Tell me how you’re feeling
     </h1>
-    <p id="ui-subheading" class="text-base text-orange-800/80 mb-12 transition-all duration-300">
+    <p id="ui-subheading" data-i18n-key="subheading" class="text-base text-orange-800/80 mb-12 transition-all duration-300">
       Speak for up to 30 seconds. I’ll listen and respond.
     </p>
 
     <!-- Status Region -->
     <div class="h-12 mb-8 flex items-center justify-center text-center">
-      <p id="status-text" class="text-lg font-medium text-orange-900 transition-all duration-300" aria-live="polite">
+      <p id="status-text" data-i18n-key="status_start" class="text-lg font-medium text-orange-900 transition-all duration-300" aria-live="polite">
         Tap the microphone to start.
       </p>
     </div>
@@ -177,6 +177,7 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
   import { SympathySyncClient } from '../lib/webrtc';
   import { startHapticPacing, stopHapticPacing } from '../lib/haptics';
   import { getEnvironmentalContext } from '../lib/environment';
+  import { translateUI, translations } from '../lib/i18n';
   
   const i18n = {
     en: { langName: "English", heading: "Tell me how you’re feeling", status_start: "Tap the microphone to start.", status_recording: "Recording… {time}", status_processing: "Processing…", status_error: "Something went wrong.", response_prefix: "I hear you’re feeling:" },
@@ -209,6 +210,11 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       });
 
       this.init();
+      
+      // Initialize text to localized state if needed
+      if (this.currentLang && this.currentLang !== 'en') {
+        setTimeout(() => translateUI(this.currentLang), 0);
+      }
     }
 
     init() {
@@ -277,12 +283,14 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       this.soundscapePlaying = !this.soundscapePlaying;
       toggleSoundscape(this.soundscapePlaying);
       const txt = this.querySelector('#audio-status-text');
+      const langDict = translations[this.currentLang] || translations['en'];
+      
       if (this.soundscapePlaying) {
-        txt.textContent = 'Soundscape: On';
+        txt.textContent = langDict.soundscape_on || 'Soundscape: On';
         this.audioToggleBtn.classList.replace('bg-orange-100', 'bg-green-100');
         this.audioToggleBtn.classList.replace('text-orange-800', 'text-green-800');
       } else {
-        txt.textContent = 'Soundscape: Off';
+        txt.textContent = langDict.soundscape_off || 'Soundscape: Off';
         this.audioToggleBtn.classList.replace('bg-green-100', 'bg-orange-100');
         this.audioToggleBtn.classList.replace('text-green-800', 'text-orange-800');
       }
@@ -302,6 +310,11 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       localStorage.setItem('moodReliefLang', langCode);
       document.documentElement.dir = (langCode === 'ur') ? 'rtl' : 'ltr';
       this.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === langCode));
+      
+      translateUI(langCode);
+      
+      // Dispatch event for other components to listen
+      window.dispatchEvent(new CustomEvent('language-changed', { detail: langCode }));
       
       // Update Crisis UI globally if available
       if (window.updateCrisisUI) window.updateCrisisUI(langCode);
@@ -399,7 +412,10 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       }
       this.isRecording = false;
       this.querySelector('#record-view').classList.remove('is-recording');
-      this.querySelector('#status-text').textContent = "Processing…";
+      
+      const langDict = translations[this.currentLang] || translations['en'];
+      this.querySelector('#status-text').textContent = langDict.status_processing || "Processing…";
+      
       if (window.stopVoiceFluid) window.stopVoiceFluid();
       if (window.stopOpticalVitals) window.stopOpticalVitals();
     }
@@ -461,7 +477,9 @@ import ImmersiveRoom from './ImmersiveRoom.astro';
       this.querySelector('#breathing-circle-container').classList.add('hidden');
       const crisis = this.querySelector('#crisis-handoff');
       if (crisis) crisis.classList.add('hidden');
-      this.querySelector('#status-text').textContent = "Tap the microphone to start.";
+      
+      const langDict = translations[this.currentLang] || translations['en'];
+      this.querySelector('#status-text').textContent = langDict.status_start || "Tap the microphone to start.";
       stopHapticPacing();
     }
   }

@@ -66,7 +66,12 @@ async function processAudioWithGemini(chunks: Uint8Array[], langCode: string, en
   const languageNames: Record<string, string> = {
     en: "English", hi: "Hindi", bn: "Bengali", te: "Telugu", mr: "Marathi", ta: "Tamil", gu: "Gujarati", ur: "Urdu", kn: "Kannada", or: "Odia", ml: "Malayalam", pa: "Punjabi", as: "Assamese"
   };
-  const systemPrompt = buildSystemPrompt(languageNames[langCode] || "English", envContext, langCode);
+  const targetLanguage = languageNames[langCode] || "English";
+  let systemPrompt = buildSystemPrompt(targetLanguage, envContext, langCode);
+  
+  // Forceful prompt injection for Strict i18n
+  systemPrompt += `\n\nCRITICAL INSTRUCTION: You MUST respond entirely in ${targetLanguage}. Do not use English unless explicitly asked.`;
+
   
   try {
     // In Astro on Cloudflare, env vars are often on locals.runtime.env or import.meta.env

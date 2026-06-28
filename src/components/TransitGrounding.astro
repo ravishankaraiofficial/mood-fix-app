@@ -3,13 +3,24 @@
 ---
 <button id="travel-relief-toggle" class="w-full py-4 bg-zinc-800 text-zinc-300 font-bold rounded-xl hover:bg-zinc-700 transition-colors uppercase tracking-wider text-sm shadow-sm border border-zinc-700 flex justify-center items-center gap-2">
   <svg class="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-  <span id="travel-relief-text">travel relief sound</span>
+  <span id="travel-relief-text" data-i18n-key="travel_relief">travel relief sound</span>
 </button>
 
 <script>
+  import { translations } from '../lib/i18n';
+  
   let transitOscillators = [];
   let transitHapticInterval = null;
   let isTransitOn = false;
+
+  // Listen to language changes immediately on the client side
+  window.addEventListener('language-changed', (e) => {
+    const langDict = translations[e.detail] || translations['en'];
+    const textSpan = document.getElementById('travel-relief-text');
+    if (textSpan) {
+       textSpan.textContent = isTransitOn ? (langDict.travel_relief_on || 'travel relief sound (ON)') : (langDict.travel_relief || 'travel relief sound');
+    }
+  });
 
   document.getElementById('travel-relief-toggle')?.addEventListener('click', (e) => {
     const btn = e.currentTarget;
@@ -17,11 +28,12 @@
     
     if (!isTransitOn) {
       isTransitOn = true;
+      const langDict = translations[localStorage.getItem('moodReliefLang') || 'en'] || translations['en'];
       btn.classList.replace('bg-zinc-800', 'bg-orange-600');
       btn.classList.replace('hover:bg-zinc-700', 'hover:bg-orange-700');
       btn.classList.replace('text-zinc-300', 'text-white');
       btn.classList.replace('border-zinc-700', 'border-orange-500');
-      if (textSpan) textSpan.textContent = 'travel relief sound (ON)';
+      if (textSpan) textSpan.textContent = langDict.travel_relief_on || 'travel relief sound (ON)';
       
       // Start audio
       try {
@@ -71,11 +83,12 @@
       
     } else {
       isTransitOn = false;
+      const langDict = translations[localStorage.getItem('moodReliefLang') || 'en'] || translations['en'];
       btn.classList.replace('bg-orange-600', 'bg-zinc-800');
       btn.classList.replace('hover:bg-orange-700', 'hover:bg-zinc-700');
       btn.classList.replace('text-white', 'text-zinc-300');
       btn.classList.replace('border-orange-500', 'border-zinc-700');
-      if (textSpan) textSpan.textContent = 'travel relief sound';
+      if (textSpan) textSpan.textContent = langDict.travel_relief || 'travel relief sound';
       
       // Stop audio
       if (transitOscillators.length > 0) {
