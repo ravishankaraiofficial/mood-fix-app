@@ -45,6 +45,12 @@
   --animate-slide-up: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+@variant dark (&:where(.dark, .dark *));
+
+.dark {
+  @apply bg-gray-900 text-gray-100;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
